@@ -81,7 +81,6 @@ div {
 	font-size: 16px;
 	background: #322b27;
 	border-top: 4px solid #000;
-	margin-top: 6.25em;
 }
 
 [role=footer-info] .row {
@@ -100,6 +99,19 @@ div {
 	color: #FFF;
 	font-family: 'Titillium Web', sans-serif;
 	text-shadow: 1px 1px #FF5300;
+}
+
+.footer-social-icons {
+	float: left;
+	padding: 5px;
+}
+
+.footer-social-icons a {
+	margin: 10px;
+}
+
+.footer-social-icons a:hover {
+	
 }
 
 .logo {
