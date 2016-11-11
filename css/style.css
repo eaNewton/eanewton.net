@@ -112,7 +112,7 @@ div {
 	margin: 10px;
 }
 
-.hvr-glow {
+.hvr-glow img {
   display: inline-block;
   vertical-align: middle;
   -webkit-transform: perspective(1px) translateZ(0);
@@ -123,7 +123,7 @@ div {
   -webkit-transition-property: box-shadow;
   transition-property: box-shadow;
 }
-.hvr-glow:hover, .hvr-glow:focus, .hvr-glow:active {
+.hvr-glow:hover img {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
 }
 
