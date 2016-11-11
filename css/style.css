@@ -106,6 +106,7 @@ div {
 .footer-social-icons {
 	float: left;
 	padding: 5px;
+	display: flex;
 }
 
 .footer-social-icons a {
