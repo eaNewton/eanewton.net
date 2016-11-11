@@ -61,6 +61,7 @@ div {
 	width: 100%;
 	z-index: 1;
 	background-color: #FFF;
+	height: inherit;
 }
 
 .row {
