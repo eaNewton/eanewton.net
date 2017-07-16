@@ -1,0 +1,11 @@
+.footer {
+  height: 150px;
+  width: inherit;
+  position: fixed;
+  bottom: 0;
+  #copyright {
+    font-family: $secondary-font;
+    text-align: center;
+    color: #FEFCD7;
+  }
+}

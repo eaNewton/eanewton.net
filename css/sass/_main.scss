@@ -1,0 +1,47 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	overflow: hidden;
+	height: inherit;
+	width: inherit;
+}
+
+::selection {
+  background: rgba(96, 72, 120, 0.5); /* WebKit/Blink Browsers */
+	color: #FEFCD7;
+}
+::-moz-selection {
+  background: rgba(96, 72, 120, 0.5); /* Gecko Browsers */
+	color: #FEFCD7;
+}
+
+.canvas {
+	width: inherit;
+	height: inherit;
+	background: #001848;
+	background: -webkit-linear-gradient(top, #001848 0%, #604878 100%);
+	background: -linear-gradient(top, #001848 0%, #604878 100%);
+	background: -moz-linear-gradient(top, #001848 0%, #604878 100%);
+	.container {
+		width: 88%;
+		margin: 0 auto;
+		#under_construction {
+			color: #FEFCD7;
+			text-align: right;
+			padding-top: 90px;
+			#again {
+				color: rgba(254, 252, 215, 0.2);
+				display: block;
+				font-size: 36px;
+			}
+		}
+	}
+}
