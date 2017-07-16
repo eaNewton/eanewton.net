@@ -50,6 +50,34 @@ body {
         display: block;
         font-size: 36px; }
 
+.header {
+  width: 88%;
+  height: 150px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around; }
+  .header .logo-container {
+    display: inline-block; }
+    .header .logo-container #site-logo {
+      width: auto; }
+      .header .logo-container #site-logo > a {
+        text-decoration: none;
+        color: #FEFCD7; }
+  .header .nav-container {
+    display: inline-block; }
+    .header .nav-container .nav {
+      list-style-type: none;
+      display: inline-flex; }
+      .header .nav-container .nav .nav-item {
+        padding: 0 1.5em; }
+        .header .nav-container .nav .nav-item .nav-item-link {
+          text-decoration: none;
+          font-family: "Pathway Gothic One", sans-serif;
+          color: #FEFCD7;
+          font-size: 22px;
+          line-height: 20px; }
+
 .footer {
   height: 150px;
   width: inherit;

@@ -1,0 +1,35 @@
+.header {
+  width: 88%;
+  height: 150px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  .logo-container {
+    display: inline-block;
+    #site-logo {
+      width: auto;
+      > a {
+        text-decoration: none;
+        color: #FEFCD7;
+      }
+    }
+  }
+  .nav-container {
+    display: inline-block;
+    .nav {
+      list-style-type: none;
+      display: inline-flex;
+      .nav-item {
+        padding: 0 1.5em;
+        .nav-item-link {
+          text-decoration: none;
+          font-family: $primary-font;
+          color: #FEFCD7;
+          font-size: 22px;
+          line-height: 20px;
+        }
+      }
+    }
+  }
+}
