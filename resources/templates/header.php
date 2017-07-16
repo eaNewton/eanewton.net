@@ -16,10 +16,10 @@
       </div>
       <div class="nav-container">
         <ul class="nav global">
-          <li class="nav-item"><a class="nav-item-link" href="/">home</a></li>
-          <li class="nav-item"><a class="nav-item-link" href="/about"></a>about</li>
-          <li class="nav-item"><a class="nav-item-link" href="/work">work</a></li>
-          <li class="nav-item"><a class="nav-item-link" href="/contact">contact</a></li>
+          <li class="nav-item"><a class="nav-item-link hvr-grow" href="/">home</a></li>
+          <li class="nav-item"><a class="nav-item-link hvr-grow" href="/about">about</a></li>
+          <li class="nav-item"><a class="nav-item-link hvr-grow" href="/work">work</a></li>
+          <li class="nav-item"><a class="nav-item-link hvr-grow" href="/contact">contact</a></li>
         </ul>
       </div>
     </header>
