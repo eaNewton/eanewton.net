@@ -41,20 +41,22 @@ function test_input($data) {
 ?>
 
 <div class="form-container">
-  <form id="contact-form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+  <form id="contact-form" class="send-down" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
     <div class="form_field" id="name_field">
+      <input type="text" name="name" value="<?php echo $name; ?>" required></input>
       <label for="name">name</label>
-      <input type="text" name="name" value="<?php echo $name; ?>"></input>
     </div>
     <div class="form_field" id="email_field">
+      <input type="email" name="email" value="<?php echo $email; ?>" required></input>
       <label for="email">email</label>
-      <input type="email" name="email" value="<?php echo $email; ?>"></input>
     </div>
     <div class="form_field" id="message_field">
+      <textarea name="message" rows="5" columns="40" required></textarea>
       <label for="message">message</label>
-      <textarea name="message" rows="5" columns="40"></textarea>
     </div>
-    <input id="submit-button" type="submit" name="submit" value="submit"></input>
+    <div class="form_field" id="submit_field">
+      <input id="submit-button" type="submit" name="submit" value="submit"></input>
+    </div>
   </form>
 </div>
 
