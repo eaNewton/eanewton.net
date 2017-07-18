@@ -18,6 +18,7 @@
   ],
   "dependencies": {
     "normalize-css": "^5.0.0",
+    "monkee-mixins": "^1.10.0",
     "susy": "^2.2.12"
   }
 }

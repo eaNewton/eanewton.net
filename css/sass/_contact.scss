@@ -1,0 +1,31 @@
+.form-container {
+  width: 75%;
+  margin: 0 auto;
+  #contact-form {
+    text-align: center;
+    label {
+      font-size: 30px;
+      font-family: $primary-font;
+      color: #FEFCD7;
+    }
+    #submit-button {
+      height: 50px;
+      width: 150px;
+      font-size: 24px;
+      font-family: $primary-font;
+      color: #FEFCD7;
+      border: none;
+      margin: 0 auto;
+      background: #000012;
+      -o-transition:.25s;
+      -ms-transition:.25s;
+      -moz-transition:.25s;
+      -webkit-transition:.25s;
+      transition:.25s;
+      display: block;
+      &:hover {
+        background: #1A1A2C;
+      }
+    }
+  }
+}
