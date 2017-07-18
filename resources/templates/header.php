@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>eanewton.net</title>
     <link rel="stylesheet" type="text/css" href="/css/app.min.css">
+    <script type="text/javascript" src="/js/app.min.js"></script>
 </head>
 
 <body>
