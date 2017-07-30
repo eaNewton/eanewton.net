@@ -26,6 +26,13 @@
     left: 2.25em;
     width: 85px;
     fill: #001848;
+    transition: 0.5s;
+    @media (max-width: 425px) {
+      left: 1.25em;
+    }
+    @media (max-width: 375px) {
+      left: 0.25em;
+    }
   }
   .footer-nav-container {
     display: flex;
