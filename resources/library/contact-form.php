@@ -42,17 +42,29 @@ function test_input($data) {
 
 <div class="form-container">
   <form id="contact-form" class="send-down" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-    <div class="form_field" id="name_field">
-      <input type="text" name="name" value="<?php echo $name; ?>" required></input>
-      <label for="name">name</label>
+    <div class="col-3 input-effect">
+      <input class="effect-22" type="text" placeholder="">
+        <label>First Name</label>
+        <span class="focus-bg"></span>
+
+      <!-- <input type="text" name="name" value="<?php echo $name; ?>" required></input>
+      <label for="name">name</label> -->
     </div>
-    <div class="form_field" id="email_field">
-      <input type="email" name="email" value="<?php echo $email; ?>" required></input>
-      <label for="email">email</label>
+    <div class="col-3 input-effect">
+      <input class="effect-22" type="email" name="email" placeholder="">
+        <label>Email</label>
+        <span class="focus-bg"></span>
+
+      <!-- <input class="effect-22" type="email" name="email" value="<?php echo $email; ?>" required></input>
+      <label for="email">email</label> -->
     </div>
-    <div class="form_field" id="message_field">
-      <textarea name="message" rows="5" columns="40" required></textarea>
-      <label for="message">message</label>
+    <div class="form_field col-3 input-effect" id="message_field">
+      <textarea class="effect-22" rows="5" columns="40"></textarea>
+        <label>Message</label>
+        <span class="focus-bg"></span>
+
+      <!-- <textarea name="message" rows="5" columns="40" required></textarea>
+      <label for="message">message</label> -->
     </div>
     <div class="form_field" id="submit_field">
       <input id="submit-button" type="submit" name="submit" value="submit"></input>

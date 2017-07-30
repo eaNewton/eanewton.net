@@ -5,13 +5,7 @@
 ?>
 <div class="container">
     <div class="content">
-      <h2 id="contact-header"></h2>
-      <?php
-      ini_set('display_errors', 1);
-      error_reporting(E_ALL|E_STRICT);
-
-      include($_SERVER["DOCUMENT_ROOT"] . "/resources/library/contact-form.php");
-      ?>
+      <h1 id="under_construction">Austin, TX</h1>
     </div>
 </div>
 <?php

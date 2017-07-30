@@ -1,101 +1,116 @@
+#contact-header {
+  color: palette(moonlight);
+}
+
+:focus{
+  outline: none;
+}
+
 .form-container {
   width: 75%;
-  margin: 50px auto;
+  margin: 0 auto;
+  padding: 2.5em 0;
   #contact-form {
-    width: 80%;
-    margin: 0 auto;
-    > .form_field {
+    .col-3 {
+      float: none;
+      border-radius: 5px;
+      width: 66%;
+      margin: 50px auto;
       position: relative;
-      overflow: hidden;
-      margin: 50px 0;
-    }
-    input, textarea {
-      border-radius: 10px;
-      border: none;
       background: #604878;
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @media (max-width: 768px) {
+        width: 88%;
+      }
+      @media (max-width: 475px) {
+        width: 100% !important;
+      }
+      .effect-22 {
+        resize: none;
+        width: 100%;
+        font-size: 20px;
+        color: #FEFCD7;
+        padding: 7px 0px;
+        margin: 0 15px;
+        border: none;
+        position: relative;
+        background: transparent;
+        &:focus {
+          outline: none;
+        }
+        ~ .focus-bg {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 0;
+          height: 100%;
+          background-color: transparent;
+          transition: 0.4s;
+          z-index: -1;
+        }
+        &:focus ~ .focus-bg,
+        .has-content.effect-22 ~ .focus-bg {
+          transition: 0.4s;
+          width: 100%;
+          background-color: #ededed;
+        }
+        ~ label {
+          position: absolute;
+          font-family: $primary-font;
+          left: 14px;
+          width: auto;
+          top: 10px;
+          color: #FEFCD7;
+          transition: 0.3s;
+          z-index: 0;
+          letter-spacing: 0.5px;
+        }
+        &:focus ~ label,
+        .has-content.effect-22 ~ label {
+          top: -18px;
+          left: 0;
+          font-size: 12px;
+          color: #FEFCD7;
+          transition: 0.3s;
+        }
+        .has-content label {
+          top: -18px;
+          left: 0;
+          font-size: 12px;
+          color: #FEFCD7;
+          transition: 0.3s;
+        }
+      }
+    }
+    #submit_field {
+      text-align: center;
+      #submit-button {
+        height: 75px;
+        width: 200px;
+        color: #FEFCD7;
+        background: #001848;
+        border: none;
+        border-radius: 5px;
+        margin: 0 auto;
+        transition: 0.3s;
+        font-size: 24px;
+        line-height: 24px;
+        font-weight: 100;
+        font-family: $primary-font;
+        &:hover {
+          background: lighten(#001848, 5%);
+        }
+      }
+    }
+    input[type="text"] {
       font-family: $secondary-font;
-      color: #001848;
+      color: palette(moonlight);
       width: 100%;
-      border: none;
-      position: relative;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      padding: 10px 25px;
-      outline: 0;
-      &:valid {
-        //hides label
-        background: #FEFCD7;
-      }
-      &:focus {
-        border-color: #604878;
-      }
-      &:focus + label {
-        background: #604878;
-        color: white;
-        font-size: 70%;
-        padding: 1px 6px;
-        z-index: 2;
-        text-transform: uppercase;
-      }
-    }
-    label {
-      background: #604878;
-      border: none;
-      transition:
-        background 0.2s,
-        color 0.2s,
-        top 0.2s,
-        bottom 0.2s,
-        right 0.2s,
-        left 0.2s;
-      position: absolute;
-      color: #FEFCD7;
-      padding: 10px 25px;
-    }
-    textarea {
-      background: #604878;
-      border: none;
-      display: block;
-      resize: none;
-    }
-  }
-  #submit_field {
-    text-align: center;
-    #submit-button {
-      width: 50%;
-      font-family: $primary-font !important;
-      color: #FEFCD7 !important;
-      background: #000012 !important;
-      border-radius: 10px;
-      -o-transition:.5s;
-      -ms-transition:.5s;
-      -moz-transition:.5s;
-      -webkit-transition:.5s;
-      transition:.5s;
-      &:hover {
-        background: #1A1A2C !important;
-      }
-    }
-  }
-  form.send-down {
-    input, textarea {
-      padding: 12px;
-    }
-    label {
-      top: 0;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-    }
-    input:focus, textarea:focus {
-      padding: 4px 6px 20px 6px;
-    }
-    input:focus + label, textarea:focus + label {
-      top: 100%;
-      margin-top: -16px;
+      box-sizing: border-box;
+      letter-spacing: 1px;
     }
   }
 }

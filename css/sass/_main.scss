@@ -12,6 +12,9 @@ body {
 	overflow: hidden;
 	height: inherit;
 	width: inherit;
+	height: 100%;
+	width: 100%;
+	overflow-y:scroll;
 }
 
 ::selection {
@@ -27,7 +30,7 @@ body {
 .canvas {
 	width: inherit;
 	height: inherit;
-	background: #001848;
+	background: palette(purple);
 	background: -webkit-linear-gradient(top, #001848 0%, #604878 100%);
 	background: -linear-gradient(top, #001848 0%, #604878 100%);
 	background: -moz-linear-gradient(top, #001848 0%, #604878 100%);
