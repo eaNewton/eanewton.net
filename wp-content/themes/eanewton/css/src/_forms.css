@@ -1,0 +1,20 @@
+.gform_wrapper {
+  margin: 0;
+  padding: 15px;
+
+  form {
+    .gform_fields {
+      .gfield {
+        .gfield_label {
+          display: none;
+        }
+
+        .ginput_complex {
+          label {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}

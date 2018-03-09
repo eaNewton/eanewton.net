@@ -10,14 +10,13 @@
 
 <body <?php body_class(); ?>>
 <div id="page" class="site">
-	<a class="skip-link screen-reader-text" href="#content"><?php _e( 'Skip to content', 'twentyseventeen' ); ?></a>
 
 	<header id="masthead" class="site-header" role="banner">
 
 		<div class="header-container">
       <div class="header-left">
         <a href="/">
-          <img src="/wp-content/themes/eanewton/images/logo-sky.png"/>
+          <img src="/wp-content/themes/eanewton/images/logo-sea.png"/>
         </a>
       </div>
       <div class="header-right desktop">
@@ -29,12 +28,14 @@
       </div>
       <div class="header-right mobile">
         <a href="#" id="mobile-menu-trigger" class="mobile-menu-trigger">
-          <img onclick="andThenThereWasLight()" id="mobile-menu-icon" class="mobile-menu-icon" src="/wp-content/themes/eanewton/images/light-bulb.svg"/>
+          <img onclick="andThenThereWasLight()" id="mobile-menu-icon" class="mobile-menu-icon" src="/wp-content/themes/eanewton/images/light-bulb-off.svg"/>
         </a>
+        <?php if ( has_nav_menu( 'top' ) ) :
+                wp_nav_menu();
+              endif; ?>
       </div>
     </div>
 
 	</header><!-- #masthead -->
 
-	<div class="site-content-contain">
-		<div id="content" class="site-content">
+	<div class="page-wrapper header-clear">

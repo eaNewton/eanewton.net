@@ -2,13 +2,14 @@ header#masthead {
   position: fixed;
   z-index: 999;
   width: 100%;
-  background-color: map(colors, gray, lightest);
+  background-color: map(colors, black, lightest);
 
   .header-container {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 15px;
+    box-shadow: 0 3px 5px rgba(100, 100, 100, 0.49);
 
     .header-left {
       display: flex;
@@ -49,13 +50,19 @@ header#masthead {
             padding: 10px 25px;
 
             a {
-              color: map(colors, black, lightest);
+              color: map(colors, sea, base);
+              text-transform: lowercase;
+              transition: 0.2s all ease-in-out;
+
+              &:hover, &:active {
+                color: map(colors, sky, base);
+              }
             }
           }
         }
       }
 
-      @media (max-width: 959px) {
+      @media (max-width: 767px) {
         display: none;
       }
     }
@@ -76,7 +83,30 @@ header#masthead {
         }
       }
 
-      @media (min-width: 960px) {
+      .menu-primary-navigation-container {
+        display: none;
+
+        &.open {
+          position: fixed;
+          top: 105px;
+          left: 0;
+          display: block;
+          width: 100%;
+          background-color: map(colors, gray, base);
+
+          #menu-primary-navigation-1 {
+            margin: 0;
+            padding: 15px;
+            list-style-type: none;
+
+            .menu-item {
+              padding: 10px 5px;
+            }
+          }
+        }
+      }
+
+      @media (min-width: 768px) {
         display: none;
       }
     }

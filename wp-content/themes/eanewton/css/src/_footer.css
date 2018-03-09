@@ -1,4 +1,5 @@
 footer#colophon {
   height: 100%;
   margin: 0 !important;
+  background-color: map(colors, gray, lighter);
 }

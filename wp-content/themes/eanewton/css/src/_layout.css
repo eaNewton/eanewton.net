@@ -3,3 +3,82 @@
   height: 100%;
   padding: 30px;
 }
+
+.grid-container {
+  display: grid;
+}
+
+.contact-grid {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+
+  .item1 {
+    position: relative;
+    grid-row: 1 / 2;
+    background-color: map(colors, gray, base);
+    background-image: url("/wp-content/themes/eanewton/images/bluebonnets.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      opacity: 0.33;
+      background-image: linear-gradient(to bottom right, #c9c9c9, #c9c9c9);
+    }
+  }
+
+  .item2 {
+    position: relative;
+    grid-row: 1 / 3;
+    background-color: map(colors, sea, base);
+    background-image: url("/wp-content/themes/eanewton/images/lady-bird-lake.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      content: "";
+      opacity: 0.5;
+      background-image: linear-gradient(to bottom right, #89bdd3, #89bdd3);
+    }
+  }
+
+  .item3 {
+    grid-row: 1 / 3;
+    grid-column: 3 / 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: map(colors, sky, base);
+  }
+
+  .item4 {
+    grid-row: 2 / 3;
+    background-color: map(colors, sea, base);
+  }
+}
+
+.header-clear {
+  padding-top: 105px;
+}
+
+.page-header-container {
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  background-color: map(colors, gray, lighter);
+
+  .page-title {
+    margin: 0;
+  }
+}
