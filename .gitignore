@@ -1,0 +1,12 @@
+app/inc_config.php
+uploads
+.DS_Store
+.htaccess
+.sass-cache
+bower_components/
+node_modules/
+fonts/icomoon/
+*.psd
+wp-config.php
+.capistrano
+log/capistrano.log

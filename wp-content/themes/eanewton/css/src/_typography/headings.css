@@ -1,0 +1,12 @@
+h1 {
+  font-size: 54px;
+}
+
+body, p {
+  font-family: map(fonts, m-regular);
+  color: map(colors, black, lightest);
+}
+
+p {
+  margin: 0;
+}
