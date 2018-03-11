@@ -4,6 +4,17 @@
   padding: 30px;
 }
 
+.button {
+  padding: 15px;
+  color: map(colors, black, lightest);
+  transition: 0.2s all ease-in-out;
+  background: map(colors, sea, base);
+
+  &:hover {
+    background: map(colors, sky, base);
+  }
+}
+
 .grid-container {
   display: grid;
 }
@@ -65,6 +76,74 @@
   .item4 {
     grid-row: 2 / 3;
     background-color: map(colors, sea, base);
+  }
+}
+
+.homepage-grid {
+  grid-template-columns: 15% 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  .grid-item {
+    height: 100%;
+    border: 1px dotted red;
+  }
+
+  .item1 {
+    background: map(colors, gray, lightest);
+    grid-row: 1 / -1;
+  }
+
+  .item2 {
+    background: map(colors, sky, base);
+    grid-column: 2 / 4;
+  }
+
+  .item3 {
+    background: none;
+  }
+
+  .item5 {
+    height: 100%;
+    background-color: map(colors, sea, base);
+    grid-column: 2 / 3;
+    grid-row: 2 / -1;
+
+    h1 {
+      color: map(colors, black, lightest);
+    }
+
+    @media (min-width: 1440px) {
+      padding: 60px;
+    }
+
+    @media (min-width: 960px) and (max-width: 1439px) {
+      padding: 45px;
+    }
+
+    @media (min-width: 768px) and (max-width: 959px) {
+      padding: 30px;
+    }
+
+    @media (min-width: 425px) and (max-width: 767px) {
+      padding: 20px;
+    }
+
+    @media (max-width: 424px) {
+      padding: 15px;
+    }
+  }
+
+  .item11 {
+    grid-column: 3 / -1;
+    padding: 120px 30px 75px;
+  }
+
+  .item12 {
+    grid-row: 5 / -1;
+    background-color: map(colors, gray, base);
   }
 }
 

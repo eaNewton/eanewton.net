@@ -10,4 +10,6 @@ function eanewton_scripts() {
   wp_enqueue_script( 'main', get_stylesheet_directory_uri().'/js/dist/app.min.js', array('jquery'), date(YmdHis) );
 }
 
+require_once locate_template('/inc/sites.php');
+
 ?>
