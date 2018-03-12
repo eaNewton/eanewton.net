@@ -4,14 +4,15 @@
   padding: 30px;
 }
 
-.button {
-  padding: 15px;
-  color: map(colors, black, lightest);
-  transition: 0.2s all ease-in-out;
-  background: map(colors, sea, base);
+.button-container {
+  display: flex;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
 
-  &:hover {
-    background: map(colors, sky, base);
+  .button {
+    color: black;
+    transition: 0.2s all ease-in-out;
   }
 }
 
@@ -80,70 +81,94 @@
 }
 
 .homepage-grid {
-  grid-template-columns: 15% 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  @media (min-width: 768px) {
+    grid-template-columns: 15% 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
 
-  .grid-item {
-    height: 100%;
-    border: 1px dotted red;
-  }
+    .grid-item {
+      height: 100%;
 
-  .item1 {
-    background: map(colors, gray, lightest);
-    grid-row: 1 / -1;
-  }
-
-  .item2 {
-    background: map(colors, sky, base);
-    grid-column: 2 / 4;
-  }
-
-  .item3 {
-    background: none;
-  }
-
-  .item5 {
-    height: 100%;
-    background-color: map(colors, sea, base);
-    grid-column: 2 / 3;
-    grid-row: 2 / -1;
-
-    h1 {
-      color: map(colors, black, lightest);
+      p {
+        padding: 5px;
+        color: black;
+        border: 5px solid gold;
+        background-color: yellow;
+      }
     }
 
-    @media (min-width: 1440px) {
-      padding: 60px;
+    .item1 {
+      background: map(colors, gray, lightest);
+      grid-row: 1 / -1;
     }
 
-    @media (min-width: 960px) and (max-width: 1439px) {
-      padding: 45px;
+    .item2 {
+      background: map(colors, sky, base);
+      grid-column: 2 / 4;
     }
 
-    @media (min-width: 768px) and (max-width: 959px) {
-      padding: 30px;
+    .item3 {
+      background: none;
     }
 
-    @media (min-width: 425px) and (max-width: 767px) {
-      padding: 20px;
+    .item5 {
+      height: 100%;
+      background-color: map(colors, sea, base);
+      grid-column: 2 / 3;
+      grid-row: 2 / -1;
+
+      h1 {
+        color: map(colors, black, lightest);
+      }
+
+      @media (min-width: 1440px) {
+        padding: 60px;
+      }
+
+      @media (min-width: 960px) and (max-width: 1439px) {
+        padding: 45px;
+      }
+
+      @media (min-width: 768px) and (max-width: 959px) {
+        padding: 30px;
+      }
+
+      @media (min-width: 425px) and (max-width: 767px) {
+        padding: 20px;
+      }
+
+      @media (max-width: 424px) {
+        padding: 15px;
+      }
     }
 
-    @media (max-width: 424px) {
-      padding: 15px;
+    .item10 {
+      background-color: map(colors, gray, lightest);
     }
-  }
 
-  .item11 {
-    grid-column: 3 / -1;
-    padding: 120px 30px 75px;
-  }
+    .item11 {
+      background-color: map(colors, gray, base);
+    }
 
-  .item12 {
-    grid-row: 5 / -1;
-    background-color: map(colors, gray, base);
+    .item12 {
+      grid-column: 2 / 4;
+    }
+
+    .item13 {
+      background-color: map(colors, gray, base);
+    }
+
+    .item14 {
+      grid-column: 3 / 4;
+      background-color: map(colors, sea, base);
+    }
+
+    .item15 {
+      grid-column: 3 / -1;
+      background-color: map(colors, sky, base);
+    }
   }
 }
 

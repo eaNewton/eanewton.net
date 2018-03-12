@@ -24,14 +24,15 @@
   <div class="grid-item item8">8</div>
   <div class="grid-item item9">9</div>
   <div class="grid-item item10">10</div>
-  <div class="grid-item item11">
-    <div class="button-conainter">
-      <a class="button" href="/work">check out some of my work</a>
-    </div>
-  </div>
+  <div class="grid-item item11">11</div>
   <div class="grid-item item12">12</div>
   <div class="grid-item item13">13</div>
-  <div class="grid-item item14">14</div>
+  <div class="grid-item item14">
+    <div class="button-container">
+      <a class="button" href="/work">Lorem ipsum</a>
+    </div>
+  </div>
+  <div class="grid-item item15">15</div>
 </div>
 
 <?php get_footer(); ?>
