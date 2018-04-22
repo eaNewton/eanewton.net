@@ -110,5 +110,9 @@ header#masthead {
         display: none;
       }
     }
+
+    @media (max-width: 554px) {
+      padding: 0 15px;
+    }
   }
 }

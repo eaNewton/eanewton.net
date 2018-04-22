@@ -5,6 +5,18 @@
     transition: 0.2s all ease-in-out;
     opacity: 0.8;
 
+    .image-container {
+      @media (max-width: 767px) {
+        padding: 15px;
+      }
+    }
+
+    .title-container {
+      @media (max-width: 767px) {
+        text-align: center;
+      }
+    }
+
     &:hover {
       opacity: 1;
     }
@@ -48,5 +60,9 @@
     @media (max-width: 424px) {
       padding: 15px;
     }
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
   }
 }

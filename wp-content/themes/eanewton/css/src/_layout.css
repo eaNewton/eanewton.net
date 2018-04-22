@@ -72,6 +72,11 @@
     align-items: center;
     justify-content: center;
     background-color: map(colors, sky, base);
+
+    @media (max-width: 767px) {
+      grid-row: 1 / 2;
+      grid-column: 1 / -1;
+    }
   }
 
   .item4 {
@@ -174,6 +179,10 @@
 
 .header-clear {
   padding-top: 105px;
+
+  @media (max-width: 554px) {
+    padding-top: 75px;
+  }
 }
 
 .page-header-container {
