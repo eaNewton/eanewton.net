@@ -1,5 +1,7 @@
 <?php
 
+require_once( dirname( __FILE__ ) . '/includes/interface-itsec-two-factor-provider-on-boardable.php' );
+
 /**
  * Two-Factor Execution
  *
@@ -38,13 +40,6 @@ class ITSEC_Two_Factor {
 	private $_enabled_providers_user_meta_key = '_two_factor_enabled_providers';
 
 	/**
-	 * The user meta nonce key.
-	 *
-	 * @var string
-	 */
-	private $_user_meta_nonce_key = '_two_factor_nonce';
-
-	/**
 	 * Used to store the provider label in the event of a failed authentication.
 	 *
 	 * @var string
@@ -58,11 +53,17 @@ class ITSEC_Two_Factor {
 	 */
 	public $token;
 
+	/** @var string */
+	private $current_provider_class;
+
 	private function __construct() {
-		add_action( 'set_logged_in_cookie',     array( $this, 'set_logged_in_cookie' ) );
-		add_action( 'wp_login',                 array( $this, 'handle_authenticated_login' ), 10, 2 );
-		add_action( 'login_form_validate_2fa',  array( $this, 'login_form_validate_2fa' ) );
-		add_action( 'login_form_backup_2fa',    array( $this, 'backup_2fa' ) );
+
+		require_once( dirname( __FILE__ ) . '/class-itsec-two-factor-on-board.php' );
+		$on_board = new ITSEC_Two_Factor_On_Board( $this );
+		$on_board->run();
+
+		add_action( 'itsec_login_interstitial_init', array( $this, 'register_interstitial' ) );
+
 		add_action( 'show_user_profile',        array( $this, 'user_two_factor_options' ) );
 		add_action( 'edit_user_profile',        array( $this, 'user_two_factor_options' ) );
 		add_action( 'personal_options_update',  array( $this, 'user_two_factor_options_update' ) );
@@ -72,8 +73,6 @@ class ITSEC_Two_Factor {
 		add_filter( 'itsec-filter-itsec-get-everything-verbs', array( $this, 'register_sync_get_everything_verbs' ) );
 
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
-		add_action( 'wp_ajax_itsec-dismiss-notice-2fa-recommended-remind-again', array( $this, 'dismiss_recommended_notice_remind_again' ) );
-		add_action( 'wp_ajax_itsec-dismiss-notice-2fa-recommended', array( $this, 'dismiss_recommended_notice' ) );
 
 		add_action( 'load-profile.php', array( $this, 'add_profile_page_styling' ) );
 		add_action( 'load-user-edit.php', array( $this, 'add_profile_page_styling' ) );
@@ -117,23 +116,6 @@ class ITSEC_Two_Factor {
 				add_action( 'admin_notices', array( $this, 'show_two_factor_disabled_warning' ) );
 			}
 		}
-
-		$user_id = get_current_user_id();
-
-		if ( 0 === $user_id ) {
-			return;
-		}
-
-		// Permanently hidden?
-		$hidden = get_user_meta( $user_id, 'itsec-two-factor-hide-recommended-notice', true );
-		// Hidden only until next login?
-		$hidden_for_session = get_user_meta( $user_id, 'itsec-two-factor-hide-recommended-notice-this-session', true );
-		// Hidden on this page
-		$hidden_for_page = ( 'profile.php' === $pagenow ) ? true : false;
-
-		if ( ! $hidden && ! $hidden_for_session && ! $hidden_for_page && ! $this->is_user_using_two_factor() ) {
-			ITSEC_Core::add_notice( array( $this, 'recommend_2fa_dashboard_notice' ), true );
-		}
 	}
 
 	public function show_two_factor_disabled_warning() {
@@ -144,26 +126,6 @@ class ITSEC_Two_Factor {
 		echo '<div class="error"><p><strong>';
 		echo wp_kses( __( 'The <code>ITSEC_DISABLE_TWO_FACTOR</code> define is present. As long as the define is present, two-factor authentication is disabled for all users which makes your site more vulnerable. Please make any necessary changes and remove the define as soon as possible.', 'it-l10n-ithemes-security-pro' ), array( 'code' => array() ) );
 		echo '</strong></p></div>';
-	}
-
-	/**
-	 * Dismisses the recommended nag for this login.
-	 */
-	public function dismiss_recommended_notice_remind_again() {
-		if ( update_user_meta( get_current_user_id(), 'itsec-two-factor-hide-recommended-notice-this-session', true ) ) {
-			wp_send_json_success();
-		}
-		wp_send_json_error();
-	}
-
-	/**
-	 * Dismisses the recommended nag permanently.
-	 */
-	public function dismiss_recommended_notice() {
-		if ( update_user_meta( get_current_user_id(), 'itsec-two-factor-hide-recommended-notice', true ) ) {
-			wp_send_json_success();
-		}
-		wp_send_json_error();
 	}
 
 	/**
@@ -377,9 +339,11 @@ class ITSEC_Two_Factor {
 	 * Get all Two-Factor Auth providers that are both enabled and configured for the specified|current user.
 	 *
 	 * @param WP_User $user WP_User object of the logged-in user.
-	 * @return array
+	 * @param bool    $add_enforced Whether to add in the email provider if 2fa is enforced for the user's account.
+	 *
+	 * @return Two_Factor_Provider[]
 	 */
-	public function get_available_providers_for_user( $user = null ) {
+	public function get_available_providers_for_user( $user = null, $add_enforced = true ) {
 		$this->load_helper();
 
 		if ( empty( $user ) || ! is_a( $user, 'WP_User' ) ) {
@@ -400,7 +364,7 @@ class ITSEC_Two_Factor {
 			}
 		}
 
-		if ( ! isset( $configured_providers['Two_Factor_Email'] ) && isset( $providers['Two_Factor_Email'] ) && $this->user_requires_two_factor( $user->ID ) ) {
+		if ( $add_enforced && ! isset( $configured_providers['Two_Factor_Email'] ) && isset( $providers['Two_Factor_Email'] ) && $this->user_requires_two_factor( $user->ID ) ) {
 			$configured_providers['Two_Factor_Email'] = $providers['Two_Factor_Email'];
 		}
 
@@ -599,123 +563,62 @@ class ITSEC_Two_Factor {
 	}
 
 	/**
-	 * Handle the browser-based login.
+	 * Register the 2fa interstitial.
 	 *
-	 * The wp_login action that this is connected to fires after a user is successfully logged in. We use it to provide
-	 * the two-factor prompt for users that require two-factor to successfully log in.
-	 *
-	 * @param string  $user_login Username.
-	 * @param WP_User $user WP_User object of the logged-in user.
+	 * @param ITSEC_Lib_Login_Interstitial $lib
 	 */
-	public function handle_authenticated_login( $user_login, $user ) {
+	public function register_interstitial( $lib ) {
+		$lib->register( '2fa', array( $this, 'render_interstitial' ), array(
+			'submit'       => array( $this, 'submit_interstitial' ),
+			'show_to_user' => array( $this, 'show_to_user' ),
+			'after_submit' => array( $this, 'after_submit' ),
+			'priority'     => 1,
+		) );
+	}
+
+	/**
+	 * Whether to show the interstitial to the given user.
+	 *
+	 * @param WP_User $user
+	 *
+	 * @return bool
+	 */
+	public function show_to_user( $user ) {
+
 		if ( ! $this->is_user_using_two_factor( $user->ID ) ) {
 			// The user is logged in and not using two factor, remove user meta to show recommended notice again.
 			delete_user_meta( $user->ID, 'itsec-two-factor-hide-recommended-notice-this-session' );
-			return;
+			return false;
 		}
 
 		if ( $this->is_sync_override_active( $user->ID ) ) {
 			// Sync override is active. Do not request the authentication code.
-			return;
+			return false;
 		}
 
 		if ( did_action( 'jetpack_sso_handle_login' ) ) {
 			// This is a Jetpack Single Sign On login.
-			return;
+			return false;
 		}
 
-		if ( $this->token ) {
-			// Destroy the session token so that the authentication cookie is no longer valid. This prevents
-			// side-stepping the two-factor requirement.
-
-			// Based on wp_destroy_current_session() but uses $user->ID instead of get_current_user_id()
-			$manager = WP_Session_Tokens::get_instance( $user->ID );
-			$manager->destroy( $this->token );
+		if ( ITSEC_Modules::get_setting( 'two-factor', 'disable_first_login' ) && ! get_user_meta( $user->ID, '_itsec_has_logged_in', true ) ) {
+			return false;
 		}
-		wp_clear_auth_cookie();
 
-		$this->show_two_factor_login( $user );
-		exit;
+		return true;
 	}
 
 	/**
-	 * Store the current session token in $this->token to use it to wipe out the session if a 2fa challenge is given
+	 * Render the interstitial.
 	 *
-	 * @param string $cookie Logged in cookie
+	 * @param WP_User $user
+	 * @param array   $args
 	 */
-	public function set_logged_in_cookie( $cookie ) {
-		$cookie = wp_parse_auth_cookie( $cookie, 'logged_in' );
-		$this->token = ! empty( $cookie['token'] ) ? $cookie['token'] : '';
-	}
+	public function render_interstitial( $user, $args ) {
 
-	/**
-	 * Display the login form.
-	 *
-	 * @param WP_User $user WP_User object of the logged-in user.
-	 */
-	public function show_two_factor_login( $user ) {
-		if ( ! $user ) {
-			$user = wp_get_current_user();
-		}
+		$provider = empty( $_GET['provider'] ) ? '' : $_GET['provider'];
 
-		$login_nonce = $this->create_login_nonce( $user->ID );
-		if ( ! $login_nonce ) {
-			wp_die( esc_html__( 'Could not save login nonce.', 'it-l10n-ithemes-security-pro' ) );
-		}
-
-		$redirect_to = isset( $_REQUEST['redirect_to'] ) ? $_REQUEST['redirect_to'] : $_SERVER['REQUEST_URI'];
-
-		$this->login_html( $user, $login_nonce['key'], $redirect_to );
-	}
-
-	/**
-	 * Display the backup Two Factor form.
-	 */
-	public function backup_2fa() {
-		if ( ! isset( $_GET['wp-auth-id'], $_GET['wp-auth-nonce'], $_GET['provider'] ) ) {
-			return;
-		}
-
-		$user = get_userdata( $_GET['wp-auth-id'] );
-		if ( ! $user ) {
-			return;
-		}
-
-		$nonce = $_GET['wp-auth-nonce'];
-		if ( true !== $this->verify_login_nonce( $user->ID, $nonce ) ) {
-			wp_safe_redirect( get_bloginfo( 'url' ) );
-			exit;
-		}
-
-		$providers = $this->get_available_providers_for_user( $user );
-		if ( isset( $providers[ $_GET['provider'] ] ) ) {
-			$provider = $providers[ $_GET['provider'] ];
-		} else {
-			wp_die( esc_html__( 'Cheatin&#8217; uh?', 'it-l10n-ithemes-security-pro' ), 403 );
-		}
-
-		$this->login_html( $user, $_GET['wp-auth-nonce'], $_GET['redirect_to'], '', $provider );
-
-		exit;
-	}
-
-	public function return_empty_array( $actions ) {
-		return array();
-	}
-
-	/**
-	 * Generates the html form for the second step of the authentication process.
-	 *
-	 * @param WP_User       $user WP_User object of the logged-in user.
-	 * @param string        $login_nonce A string nonce stored in usermeta.
-	 * @param string        $redirect_to The URL to which the user would like to be redirected.
-	 * @param string        $error_msg Optional. Login error message.
-	 * @param string|object $provider An override to the provider.
-	 */
-	public function login_html( $user, $login_nonce, $redirect_to, $error_msg = '', $provider = null ) {
-		add_filter( 'jetpack_sso_allowed_actions', array( $this, 'return_empty_array' ) );
-
-		if ( empty( $provider ) ) {
+		if ( ! $provider ) {
 			$provider = $this->get_primary_provider_for_user( $user->ID );
 		} elseif ( is_string( $provider ) && method_exists( $provider, 'get_instance' ) ) {
 			$provider = call_user_func( array( $provider, 'get_instance' ) );
@@ -725,161 +628,58 @@ class ITSEC_Two_Factor {
 
 		$available_providers = $this->get_available_providers_for_user( $user );
 		$backup_providers = array_diff_key( $available_providers, array( $provider_class => null ) );
-		$interim_login = isset($_REQUEST['interim-login']);
 
-		$wp_login_url = set_url_scheme( wp_login_url(), 'login_post' );
-		$wp_login_url = add_query_arg( 'action', 'validate_2fa', $wp_login_url );
+		?>
+		<input type="hidden" name="provider" id="provider" value="<?php echo esc_attr( $provider_class ); ?>" />
+		<?php $provider->authentication_page( $user ); ?>
 
-		if ( isset( $_GET['wpe-login'] ) && ! preg_match( '/[&?]wpe-login=/', $wp_login_url ) ) {
-			$wp_login_url = add_query_arg( 'wpe-login', $_GET['wpe-login'], $wp_login_url );
-		}
-
-		$rememberme = 0;
-		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
-			$rememberme = 1;
-		}
-
-		if ( ! function_exists( 'login_header' ) ) {
-			// login_header() should be migrated out of `wp-login.php` so it can be called from an includes file.
-			require_once( ITSEC_Core::get_core_dir() . '/lib/includes/function.login-header.php' );
-		}
-
-		login_header();
-
-		if ( ! empty( $error_msg ) ) {
-			echo '<div id="login_error"><strong>' . esc_html( $error_msg ) . '</strong><br /></div>';
-		}
-
-?>
-				<form name="validate_2fa_form" id="loginform" action="<?php echo esc_url( $wp_login_url ); ?>" method="post" autocomplete="off">
-					<input type="hidden" name="provider" id="provider" value="<?php echo esc_attr( $provider_class ); ?>" />
-					<input type="hidden" name="wp-auth-id" id="wp-auth-id" value="<?php echo esc_attr( $user->ID ); ?>" />
-					<input type="hidden" name="wp-auth-nonce" id="wp-auth-nonce" value="<?php echo esc_attr( $login_nonce ); ?>" />
-					<?php if ( $interim_login ) : ?>
-						<input type="hidden" name="interim-login" value="1" />
-					<?php else : ?>
-						<input type="hidden" name="redirect_to" value="<?php echo esc_attr($redirect_to); ?>" />
-					<?php endif; ?>
-					<input type="hidden" name="rememberme" id="rememberme" value="<?php echo esc_attr( $rememberme ); ?>" />
-
-					<?php $provider->authentication_page( $user ); ?>
-
-					<?php if ( $backup_providers ) : ?>
-						<div class="itsec-backup-methods" style="clear:both;margin-top:4em;padding-top:2em;border-top:1px solid #ddd;">
-							<p><?php esc_html_e( 'Or, use a backup method:', 'it-l10n-ithemes-security-pro' ); ?></p>
-							<ul style="margin-left:1em;">
-								<?php foreach ( $backup_providers as $backup_classname => $backup_provider ) : ?>
-									<li><a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
-											'action'        => 'backup_2fa',
-											'provider'      => $backup_classname,
-											'wp-auth-id'    => $user->ID,
-											'wp-auth-nonce' => $login_nonce,
-											'redirect_to'   => $redirect_to,
-											'rememberme'    => $rememberme,
-										) ), $wp_login_url ) ); ?>"><?php $backup_provider->print_label(); ?></a></li>
-								<?php endforeach; ?>
-							</ul>
-						</div>
-					<?php endif; ?>
-				</form>
-
-				<p id="backtoblog">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Are you lost?', 'it-l10n-ithemes-security-pro' ); ?>"><?php echo esc_html( sprintf( __( '&larr; Back to %s', 'it-l10n-ithemes-security-pro' ), get_bloginfo( 'title', 'display' ) ) ); ?></a>
-				</p>
-
+		<?php if ( $backup_providers ) : ?>
+			<div class="itsec-backup-methods" style="clear:both;margin-top:4em;padding-top:2em;border-top:1px solid #ddd;">
+				<p><?php esc_html_e( 'Or, use a backup method:', 'it-l10n-ithemes-security-pro' ); ?></p>
+				<ul style="margin-left:1em;">
+					<?php foreach ( $backup_providers as $backup_classname => $backup_provider ) : ?>
+						<li>
+							<a href="<?php echo esc_url( add_query_arg( urlencode_deep( array(
+								'action'                   => 'itsec-2fa',
+								'provider'                 => $backup_classname,
+								'redirect_to'              => $args['redirect_to'],
+								'rememberme'               => $args['rememberme'],
+								'itsec_interstitial_user'  => $user->ID,
+								'itsec_interstitial_token' => $args['token'],
+							) ), $args['wp_login_url'] ) ); ?>">
+								<?php $backup_provider->print_label(); ?>
+							</a>
+						</li>
+					<?php endforeach; ?>
+				</ul>
 			</div>
-
-			<div class="clear"></div>
-		</body>
-	</html>
-<?php
-
+		<?php endif; ?>
+		<?php
 	}
 
 	/**
-	 * Create the login nonce.
-	 *
-	 * This is an actual number used once, not a WordPress nonce.
-	 *
-	 * @param int $user_id User ID.
-	 *
-	 * @return array|false
+	 * Submit the interstitial.
+	 * 
+	 * @param WP_User $user
+	 * @param array $post_data
+	 *             
+	 * @return WP_Error|null
 	 */
-	public function create_login_nonce( $user_id ) {
-		$login_nonce               = array();
-		$login_nonce['key']        = wp_hash( $user_id . mt_rand() . microtime(), 'nonce' );
-		$login_nonce['expiration'] = time() + HOUR_IN_SECONDS;
+	public function submit_interstitial( $user, $post_data ) {
 
-		if ( ! update_user_meta( $user_id, $this->_user_meta_nonce_key, $login_nonce ) ) {
-			return false;
-		}
-
-		return $login_nonce;
-	}
-
-	/**
-	 * Delete the login nonce.
-	 *
-	 * @param int $user_id User ID.
-	 *
-	 * @return bool
-	 */
-	public function delete_login_nonce( $user_id ) {
-		return delete_user_meta( $user_id, $this->_user_meta_nonce_key );
-	}
-
-	/**
-	 * Verify the login nonce.
-	 *
-	 * @param int    $user_id User ID.
-	 * @param string $nonce Login nonce.
-	 *
-	 * @return bool
-	 */
-	public function verify_login_nonce( $user_id, $nonce ) {
-		$login_nonce = get_user_meta( $user_id, $this->_user_meta_nonce_key, true );
-		if ( ! $login_nonce ) {
-			return false;
-		}
-
-		if ( $nonce !== $login_nonce['key'] || time() > $login_nonce['expiration'] ) {
-			$this->delete_login_nonce( $user_id );
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * Login form validation.
-	 */
-	public function login_form_validate_2fa() {
-		if ( ! isset( $_POST['wp-auth-id'], $_POST['wp-auth-nonce'] ) ) {
-			return;
-		}
-
-		$user = get_userdata( $_POST['wp-auth-id'] );
-		if ( ! $user ) {
-			return;
-		}
-
-		$nonce = $_POST['wp-auth-nonce'];
-		if ( true !== $this->verify_login_nonce( $user->ID, $nonce ) ) {
-			wp_safe_redirect( get_bloginfo( 'url' ) );
-			exit;
-		}
-
-		global $interim_login;
-
-		$interim_login = isset($_REQUEST['interim-login']);
-
-		if ( isset( $_POST['provider'] ) ) {
+		$user_id = $user->ID;
+		
+		if ( isset( $post_data['provider'] ) ) {
 			$providers = $this->get_available_providers_for_user( $user );
-			if ( isset( $providers[ $_POST['provider'] ] ) ) {
-				$provider = $providers[ $_POST['provider'] ];
+			if ( isset( $providers[ $post_data['provider'] ] ) ) {
+				$provider = $providers[ $post_data['provider'] ];
 			} else {
 				ITSEC_Log::add_debug( 'two_factor', "failed_authentication::$user_id,missing_provider", compact( 'user_id', 'post_data' ) );
-				wp_die( esc_html__( 'Cheatin&#8217; uh?', 'it-l10n-ithemes-security-pro' ), 403 );
+
+				return new WP_Error(
+					'itsec-two-factor-missing-provider',
+					esc_html__( 'Invalid Two Factor provider.', 'it-l10n-ithemes-security-pro' )
+				);
 			}
 		} else {
 			$provider = $this->get_primary_provider_for_user( $user->ID );
@@ -896,55 +696,37 @@ class ITSEC_Two_Factor {
 
 			do_action( 'wp_login_failed', $user->user_login );
 
-			$login_nonce = $this->create_login_nonce( $user->ID );
-			if ( ! $login_nonce ) {
-				return;
-			}
-
-			if ( empty( $_REQUEST['redirect_to'] ) ) {
-				$_REQUEST['redirect_to'] = '';
-			}
-			$this->login_html( $user, $login_nonce['key'], $_REQUEST['redirect_to'], esc_html__( 'ERROR: Invalid verification code.', 'it-l10n-ithemes-security-pro' ) );
-			exit;
+			return new WP_Error(
+				'itsec-two-factor-invalid-code',
+				esc_html__( 'ERROR: Invalid verification code.', 'it-l10n-ithemes-security-pro' )
+			);
 		}
 
-		$this->delete_login_nonce( $user->ID );
+		return null;
+	}
 
-		$rememberme = false;
-		if ( isset( $_REQUEST['rememberme'] ) && $_REQUEST['rememberme'] ) {
-			$rememberme = true;
-		}
+	/**
+	 * Processing that happens after the user is re-logged in.
+	 *
+	 * @param WP_User $user
+	 * @param array   $post_data
+	 */
+	public function after_submit( $user, $post_data ) {
 
-		wp_set_auth_cookie( $user->ID, $rememberme );
+		$user_id        = $user->ID;
+		$provider_class = $this->current_provider_class;
 
 		ITSEC_Log::add_debug( 'two_factor', "successful_authentication::$user_id,$provider_class", compact( 'user_id', 'provider_class', 'post_data' ) );
 		do_action( 'itsec-two-factor-successful-authentication', $user->ID, $provider_class );
-
-		if ( $interim_login ) {
-			$customize_login = isset( $_REQUEST['customize-login'] );
-			if ( $customize_login ) {
-				wp_enqueue_script( 'customize-base' );
-			}
-			$message = '<p class="message">' . __('You have logged in successfully.') . '</p>';
-			$interim_login = 'success';
-			login_header( '', $message ); ?>
-			</div>
-			<?php
-			/** This action is documented in wp-login.php */
-			do_action( 'login_footer' ); ?>
-			<?php if ( $customize_login ) : ?>
-				<script type="text/javascript">setTimeout( function(){ new wp.customize.Messenger({ url: '<?php echo wp_customize_url(); ?>', channel: 'login' }).send('login') }, 1000 );</script>
-			<?php endif; ?>
-			</body></html>
-<?php		exit;
-		}
-
-		$redirect_to = apply_filters( 'login_redirect', $_REQUEST['redirect_to'], $_REQUEST['redirect_to'], $user );
-		wp_safe_redirect( $redirect_to );
-
-		exit;
 	}
 
+	/**
+	 * Filter the failed login details.
+	 *
+	 * @param array $details
+	 *
+	 * @return array
+	 */
 	public function filter_failed_login_details( $details ) {
 		if ( empty( $this->failed_provider_label ) ) {
 			$details['authentication_types'] = array( __( 'unknown_two_factor_provider', 'it-l10n-ithemes-security-pro' ) );
@@ -1023,5 +805,9 @@ Enter the verification code below to finish logging in.', 'it-l10n-ithemes-secur
 				'site_title'   => esc_html__( 'The WordPress Site Title. Can be changed under Settings -> General -> Site Title', 'it-l10n-ithemes-security-pro' ),
 			)
 		);
+	}
+
+	public function get_helper() {
+		return $this->helper;
 	}
 }

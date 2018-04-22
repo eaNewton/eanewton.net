@@ -12,37 +12,34 @@
  */
 class ITSEC_Online_Files {
 	function run() {
-		add_action( 'itsec-file-change-start-hash-comparisons', array( $this, 'load' ) );
 		add_action( 'itsec-file-change-settings-form', array( $this, 'render_settings' ) );
-		
+
 		add_filter( 'itsec-file-change-sanitize-settings', array( $this, 'sanitize_settings' ) );
 		add_action( 'itsec_scheduled_confirm-valid-wporg-plugin', array( $this, 'confirm_valid_wporg_plugin' ) );
+		add_action( 'itsec_scheduled_preload-core-hashes', array( $this, 'preload_core_hashes' ) );
 		add_action( 'itsec_scheduled_preload-plugin-hashes', array( $this, 'preload_plugin_hashes' ) );
+		add_action( 'itsec_scheduled_preload-ithemes-hashes', array( $this, 'preload_ithemes_hashes' ) );
 
 		if ( ITSEC_Modules::get_setting( 'online-files', 'compare_file_hashes' ) ) {
 			add_action( 'activated_plugin', array( $this, 'on_plugin_activate' ) );
-			add_action( 'deleted_plugin', array( $this, 'clear_hashes_on_delete' ), 10, 2 );
+			add_action( 'delete_plugin', array( $this, 'clear_hashes_on_delete' ) );
 			add_filter( 'upgrader_post_install', array( $this, 'preload_hashes_on_upgrade' ), 100, 3 );
+			add_action( 'itsec_load_file_change_scanner', array( $this, 'load_scanner' ) );
+			add_filter( 'itsec_file_change_comparators', array( $this, 'register_comparators' ) );
+			add_filter( 'itsec_file_change_package', array( $this, 'handle_ithemes_packages' ) );
+			add_filter( 'itsec_file_change_package', array( $this, 'handle_wporg_plugins' ) );
 		}
 	}
-	
-	public function load() {
-		if ( ! ITSEC_Modules::get_setting( 'online-files', 'compare_file_hashes' ) ) {
-			return;
-		}
-		
-		require_once( dirname( __FILE__ ) . '/comparison-engine.php' );
-	}
-	
+
 	public function render_settings( $form ) {
 		require_once( dirname( __FILE__ ) . '/custom-settings.php' );
-		
+
 		ITSEC_Online_Files_Custom_Settings::render_settings( $form );
 	}
-	
+
 	public function sanitize_settings( $settings ) {
 		require_once( dirname( __FILE__ ) . '/custom-settings.php' );
-		
+
 		return ITSEC_Online_Files_Custom_Settings::sanitize_settings( $settings );
 	}
 
@@ -57,16 +54,22 @@ class ITSEC_Online_Files {
 	 */
 	public function on_plugin_activate( $file ) {
 
-		require_once( dirname( __FILE__ ) . '/class-itsec-online-files-utility.php' );
-		ITSEC_Online_Files_Utility::clear_wporg_plugin_hashes( dirname( $file ) );
-
-		ITSEC_Core::get_scheduler()->schedule_soon( 'preload-plugin-hashes', compact( 'file' ) );
+		if ( $package = $this->get_ithemes_package( $file ) ) {
+			ITSEC_Online_Files_Utility::clear_ithemes_hashes( $package );
+			ITSEC_Core::get_scheduler()->schedule_soon( 'preload-ithemes-hashes', array(
+				'package' => $package,
+				'version' => $this->get_plugin_version( $file ),
+			) );
+		} else {
+			ITSEC_Online_Files_Utility::clear_wporg_plugin_hashes( dirname( $file ) );
+			ITSEC_Core::get_scheduler()->schedule_soon( 'preload-plugin-hashes', compact( 'file' ) );
+		}
 	}
 
 	/**
 	 * After a package has been installed, schedule an event to fetch the hashes.
 	 *
-	 * @param bool $success
+	 * @param bool  $success
 	 * @param array $data
 	 *
 	 * @return bool
@@ -81,7 +84,14 @@ class ITSEC_Online_Files {
 			return $success;
 		}
 
-		ITSEC_Core::get_scheduler()->schedule_soon( 'preload-plugin-hashes', array( 'file' => $data['plugin'] ) );
+		if ( $package = $this->get_ithemes_package( $data['plugin'] ) ) {
+			ITSEC_Core::get_scheduler()->schedule_soon( 'preload-ithemes-hashes', array(
+				'package' => $package,
+				'version' => $this->get_plugin_version( $data['plugin'] ),
+			) );
+		} else {
+			ITSEC_Core::get_scheduler()->schedule_soon( 'preload-plugin-hashes', array( 'file' => $data['plugin'] ) );
+		}
 
 		return $success;
 	}
@@ -90,14 +100,12 @@ class ITSEC_Online_Files {
 	 * When a plugin is uninstalled, remove its hashes from storage.
 	 *
 	 * @param string $file
-	 * @param bool   $deleted
 	 */
-	public function clear_hashes_on_delete( $file, $deleted ) {
-		if ( $deleted ) {
-			$slug = dirname( $file );
-
-			require_once( dirname( __FILE__ ) . '/class-itsec-online-files-utility.php' );
-			ITSEC_Online_Files_Utility::clear_wporg_plugin_hashes( $slug );
+	public function clear_hashes_on_delete( $file ) {
+		if ( $package = $this->get_ithemes_package( $file ) ) {
+			ITSEC_Online_Files_Utility::clear_ithemes_hashes( $package );
+		} else {
+			ITSEC_Online_Files_Utility::clear_wporg_plugin_hashes( dirname( $file ) );
 		}
 	}
 
@@ -122,7 +130,6 @@ class ITSEC_Online_Files {
 		$data = $job->get_data();
 		$slug = $data['slug'];
 
-		require_once( dirname( __FILE__ ) . '/class-itsec-online-files-utility.php' );
 		ITSEC_Online_Files_Utility::query_is_wporg_plugin( $slug );
 	}
 
@@ -140,8 +147,7 @@ class ITSEC_Online_Files {
 				return;
 			}
 
-			$file_data = get_file_data( trailingslashit( WP_PLUGIN_DIR ) . $data['file'], array( 'version' => 'Version' ) );
-			$version   = $file_data['version'];
+			$version = $this->get_plugin_version( $data['file'] );
 		} else {
 			$version = $data['version'];
 		}
@@ -154,7 +160,126 @@ class ITSEC_Online_Files {
 			return;
 		}
 
-		require_once( dirname( __FILE__ ) . '/class-itsec-online-files-utility.php' );
 		ITSEC_Online_Files_Utility::load_wporg_plugin_hashes( $slug, $version );
+	}
+
+	/**
+	 * Preload core hashes for the requested version and locale.
+	 *
+	 * @param ITSEC_Job $job
+	 */
+	public function preload_core_hashes( $job ) {
+
+		$data = $job->get_data();
+
+		ITSEC_Online_Files_Utility::load_core_hashes( $data['version'], $data['locale'] );
+	}
+
+	/**
+	 * Preload iThemes hashes for the requested package and version.
+	 *
+	 * @param ITSEC_Job $job
+	 */
+	public function preload_ithemes_hashes( $job ) {
+
+		$data = $job->get_data();
+
+		ITSEC_Online_Files_Utility::load_ithemes_hashes( $data['package'], $data['version'] );
+	}
+
+	/**
+	 * Get the iThemes package identifier from a plugin file.
+	 *
+	 * @param string $file
+	 *
+	 * @return bool
+	 */
+	private function get_ithemes_package( $file ) {
+
+		$data = @get_file_data( trailingslashit( WP_PLUGIN_DIR ) . $file, array(
+			'package' => 'iThemes Package',
+		) );
+
+		if ( empty( $data['package'] ) ) {
+			return false;
+		}
+
+		return $data['package'];
+	}
+
+	/**
+	 * Get the version header from a plugin file.
+	 *
+	 * @param string $file
+	 *
+	 * @return string
+	 */
+	private function get_plugin_version( $file ) {
+		$data = @get_file_data( trailingslashit( WP_PLUGIN_DIR ) . $file, array(
+			'version' => 'Version',
+		) );
+
+		return $data['version'];
+	}
+
+	/**
+	 * Fires when the scanner is loaded.
+	 */
+	public function load_scanner() {
+		require_once( dirname( __FILE__ ) . '/comparator-ithemes.php' );
+		require_once( dirname( __FILE__ ) . '/comparator-wporg.php' );
+		require_once( dirname( __FILE__ ) . '/package-ithemes.php' );
+		require_once( dirname( __FILE__ ) . '/package-wporg.php' );
+	}
+
+	/**
+	 * Register WP.org and iThemes comparator.
+	 *
+	 * @param ITSEC_File_Change_Hash_Comparator[] $comparators
+	 *
+	 * @return array
+	 */
+	public function register_comparators( $comparators ) {
+
+		array_unshift( $comparators, new ITSEC_File_Change_Hash_Comparator_iThemes() );
+		array_unshift( $comparators, new ITSEC_File_Change_Hash_Comparator_WPOrg_Plugin() );
+
+		return $comparators;
+	}
+
+	/**
+	 * Return iThemes packages for iThemes Plugins and Themes.
+	 *
+	 * @param ITSEC_File_Change_Package|null $package
+	 *
+	 * @return ITSEC_File_Change_Package|null
+	 */
+	public function handle_ithemes_packages( $package ) {
+
+		if ( $package instanceof ITSEC_File_Change_Package_Plugin && $id = $package->get_plugin_header( 'iThemes Package' ) ) {
+			return new ITSEC_File_Change_Package_iThemes( $package, $id );
+		}
+
+		if ( $package instanceof ITSEC_File_Change_Package_Theme && $id = $package->get_theme_header( 'iThemes Package' ) ) {
+			return new ITSEC_File_Change_Package_iThemes( $package, $id );
+		}
+
+		return $package;
+	}
+
+	/**
+	 * Return a WordPress.org Plugin package for plugins that reside on WordPress.org.
+	 *
+	 * @param ITSEC_File_Change_Package|null $package
+	 *
+	 * @return ITSEC_File_Change_Package|null
+	 */
+	public function handle_wporg_plugins( $package ) {
+
+		if ( $package instanceof ITSEC_File_Change_Package_Plugin && ITSEC_Online_Files_Utility::is_likely_wporg_plugin( dirname( $package->get_identifier() ) ) ) {
+			$package = ITSEC_File_Change_Package_WPOrg_Plugin::from_plugin( $package );
+		}
+
+		return $package;
 	}
 }

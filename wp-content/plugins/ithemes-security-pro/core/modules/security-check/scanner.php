@@ -12,6 +12,7 @@ final class ITSEC_Security_Check_Scanner {
 			'ban-users'           => __( 'Banned Users', 'it-l10n-ithemes-security-pro' ),
 			'backup'              => __( 'Database Backups', 'it-l10n-ithemes-security-pro' ),
 			'brute-force'         => __( 'Local Brute Force Protection', 'it-l10n-ithemes-security-pro' ),
+			'online-files'        => __( 'File Change Detection', 'it-l10n-ithemes-security-pro' ),
 			'magic-links'         => __( 'Magic Links', 'it-l10n-ithemes-security-pro' ),
 			'malware-scheduling'  => __( 'Malware Scan Scheduling', 'it-l10n-ithemes-security-pro' ),
 			'network-brute-force' => __( 'Network Brute Force Protection', 'it-l10n-ithemes-security-pro' ),
@@ -69,6 +70,8 @@ final class ITSEC_Security_Check_Scanner {
 		self::enforce_setting( 'wordpress-tweaks', 'rest_api', 'restrict-access', __( 'Changed the REST API setting in WordPress Tweaks to "Restricted Access".', 'it-l10n-ithemes-security-pro' ) );
 
 		self::enforce_setting( 'global', 'write_files', true, __( 'Enabled the Write to Files setting in Global Settings.', 'it-l10n-ithemes-security-pro' ) );
+
+		self::enforce_setting( 'online-files', 'compare_file_hashes', true, __( 'Enabled Online Files Comparison in File Change Detection.', 'it-l10n-ithemes-security-pro' ) );
 
 		do_action( 'itsec-security-check-after-default-checks', self::$feedback, self::$available_modules );
 	}

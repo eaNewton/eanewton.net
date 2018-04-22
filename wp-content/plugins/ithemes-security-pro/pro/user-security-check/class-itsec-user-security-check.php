@@ -327,7 +327,8 @@ class ITSEC_User_Security_Check {
 		) );
 		$mail->add_text( $message );
 
-		$configure_2fa_url = ITSEC_Mail::filter_admin_page_url( admin_url( 'index.php?itsec-action=configure-two-factor' ) );
+		$configure_2fa_url = ITSEC_Mail::filter_admin_page_url( add_query_arg( ITSEC_Lib_Login_Interstitial::SHOW_AFTER_LOGIN, '2fa-on-board', wp_login_url() ) );
+
 		$mail->add_button( esc_html__( 'Setup now', 'it-l10n-ithemes-security-pro' ), $configure_2fa_url );
 
 		$mail->add_list( array(

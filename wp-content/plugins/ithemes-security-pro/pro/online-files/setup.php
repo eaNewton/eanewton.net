@@ -50,6 +50,7 @@ if ( ! class_exists( 'ITSEC_Online_Files_Setup' ) ) {
 
 			$this->execute_deactivate();
 			delete_site_option( 'itsec_online_files' );
+			delete_site_option( 'itsec_online_files_hashes' );
 
 		}
 
@@ -72,6 +73,19 @@ if ( ! class_exists( 'ITSEC_Online_Files_Setup' ) ) {
 				if ( is_array( $current_options ) ) {
 					ITSEC_Modules::set_settings( 'online-files', array( 'compare_file_hashes' => (bool) $current_options['enabled'] ) );
 				}
+			}
+
+			if ( $itsec_old_version < 4091 ) {
+				update_site_option( 'itsec_online_files_hashes', array(
+					'wporg_plugin_hashes' => ITSEC_Modules::get_setting( 'online-files', 'wporg_plugin_hashes', array() ),
+					'core_hashes'         => ITSEC_Modules::get_setting( 'online-files', 'core_hashes', array() ),
+					'ithemes_hashes'      => ITSEC_Modules::get_setting( 'online-files', 'ithemes_hashes', array() ),
+				) );
+
+				$settings = ITSEC_Modules::get_settings( 'online-files' );
+				unset( $settings['wporg_plugin_hashes'], $settings['core_hashes'], $settings['ithemes_hashes'] );
+
+				ITSEC_Modules::set_settings( 'online-files', $settings );
 			}
 
 		}

@@ -57,7 +57,7 @@ class ITSEC_Scheduler_Command extends WP_CLI_Command {
 		}
 
 		usort( $formatted, function ( $a, $b ) {
-			$cmp = strcmp( $a['id'], $b['id'] ) ;
+			$cmp = strcmp( $a['id'], $b['id'] );
 
 			if ( $cmp === 0 ) {
 				return strtotime( $a['fire_at_gmt'] ) - strtotime( $b['fire_at_gmt'] );
@@ -113,6 +113,42 @@ class ITSEC_Scheduler_Command extends WP_CLI_Command {
 	 */
 	public function run( $args ) {
 		ITSEC_Core::get_scheduler()->run_recurring_event( $args[0] );
+	}
+
+	/**
+	 * Manually run a specific single event.
+	 *
+	 * If more than one event is found with the given id, the command
+	 * will prompt a menu to select the desired event.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <id>
+	 * : The id of the recurring event to run.
+	 *
+	 * @subcommand run-single
+	 */
+	public function run_single( $args ) {
+
+		$scheduler = ITSEC_Core::get_scheduler();
+		$single    = wp_list_filter( $scheduler->get_single_events(), array( 'id' => $args[0] ) );
+
+		if ( ! $single ) {
+			WP_CLI::error( 'No events found with that id.' );
+		}
+
+		if ( count( $single ) > 1 ) {
+			$options = wp_list_pluck( $single, 'data' );
+			$as_json = array_map( 'wp_json_encode', $options );
+
+			$i    = \cli\menu( $as_json );
+			$data = $options[ $i ];
+		} else {
+			$data = $single[0]['data'];
+		}
+
+		$scheduler->run_single_event( $args[0], $data );
+		WP_CLI::success( 'Event run' );
 	}
 }
 

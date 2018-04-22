@@ -78,7 +78,7 @@ final class ITSEC_Application_Passwords {
 
 				if ( ! in_array( 'rest-api', $item['enabled_for'] ) ) {
 					continue;
-				} else if ( ( 'read' === $item['rest_api_permissions'] ) && ( 'GET' !== strtoupper( $method ) ) ) {
+				} else if ( ( 'read' === $item['rest_api_permissions'] ) && ( ! in_array( strtoupper( $method ), array( 'GET', 'HEAD' ), true ) ) ) {
 					continue;
 				}
 			} else if ( $xml_rpc_request && ! in_array( 'xml-rpc', $item['enabled_for'] ) ) {

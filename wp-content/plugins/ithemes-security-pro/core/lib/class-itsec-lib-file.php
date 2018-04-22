@@ -213,6 +213,14 @@ class ITSEC_Lib_File {
 					// Reset the original file permissions if they were modified.
 					self::chmod( $file, $original_file_perms );
 				}
+
+				/**
+				 * Fires when iThemes Security writes to a managed file.
+				 *
+				 * @param string $file     The path to the file.
+				 * @param string $contents The contents written.
+				 */
+				do_action( 'itsec_lib_write_to_file', $file, $contents );
 				
 				return true;
 			}
@@ -261,6 +269,14 @@ class ITSEC_Lib_File {
 		@clearstatcache( true, $file );
 		
 		if ( $result ) {
+
+			/**
+			 * Fires when iThemes Security removes a managed file.
+			 *
+			 * @param string $file
+			 */
+			do_action( 'itsec_lib_delete_file', $file );
+
 			return true;
 		}
 		

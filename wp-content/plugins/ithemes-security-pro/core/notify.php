@@ -129,8 +129,8 @@ class ITSEC_Notify {
 
 		$mail->add_section_heading( esc_html__( 'Lockouts', 'it-l10n-ithemes-security-pro' ), 'lock' );
 
-		$user_count = $itsec_lockout->get_lockouts( 'user', array( 'after' => $last_sent, 'return' => 'count' ) );
-		$host_count = $itsec_lockout->get_lockouts( 'host', array( 'after' => $last_sent, 'return' => 'count' ) );
+		$user_count = $itsec_lockout->get_lockouts( 'user', array( 'after' => $last_sent, 'current' => false, 'return' => 'count' ) );
+		$host_count = $itsec_lockout->get_lockouts( 'host', array( 'after' => $last_sent, 'current' => false, 'return' => 'count' ) );
 
 		if ( $host_count > 0 || $user_count > 0 ) {
 			$mail->add_lockouts_summary( $user_count, $host_count );

@@ -113,45 +113,6 @@ final class ITSEC_Lib {
 	}
 
 	/**
-	 * Get path to WordPress install.
-	 *
-	 * Get the absolute filesystem path to the root of the WordPress installation.
-	 *
-	 * @since 4.3.0
-	 *
-	 * @return string Full filesystem path to the root of the WordPress installation
-	 */
-	public static function get_home_path() {
-
-		$home    = set_url_scheme( get_option( 'home' ), 'http' );
-		$siteurl = set_url_scheme( get_option( 'siteurl' ), 'http' );
-
-		if ( ! empty( $home ) && 0 !== strcasecmp( $home, $siteurl ) ) {
-
-			$wp_path_rel_to_home = str_ireplace( $home, '', $siteurl ); /* $siteurl - $home */
-			$pos                 = strripos( str_replace( '\\', '/', $_SERVER['SCRIPT_FILENAME'] ), trailingslashit( $wp_path_rel_to_home ) );
-
-			if ( $pos === false ) {
-
-				$home_path = dirname( $_SERVER['SCRIPT_FILENAME'] );
-
-			} else {
-
-				$home_path = substr( $_SERVER['SCRIPT_FILENAME'], 0, $pos );
-
-			}
-
-		} else {
-
-			$home_path = ABSPATH;
-
-		}
-
-		return trailingslashit( str_replace( '\\', '/', $home_path ) );
-
-	}
-
-	/**
 	 * Returns the root of the WordPress install.
 	 *
 	 * Gets the URI path to the WordPress installation.
@@ -1060,11 +1021,11 @@ final class ITSEC_Lib {
 			return;
 		}
 
-		$crons = _get_cron_array();
-
-		foreach ( $crons as $timestamp => $cron ) {
-			if ( isset( $cron['itsec_cron_test'] ) ) {
-				return;
+		if ( $crons = _get_cron_array() ) {
+			foreach ( $crons as $timestamp => $cron ) {
+				if ( isset( $cron['itsec_cron_test'] ) ) {
+					return;
+				}
 			}
 		}
 
@@ -1072,5 +1033,72 @@ final class ITSEC_Lib {
 		$time = ITSEC_Core::get_current_time_gmt() + mt_rand( 6, 18 ) * HOUR_IN_SECONDS + mt_rand( 1, 60 ) * MINUTE_IN_SECONDS;
 		wp_schedule_single_event( $time, 'itsec_cron_test', array( $time ) );
 		ITSEC_Modules::set_setting( 'global', 'cron_test_time', $time );
+	}
+
+	public static function fwdslash( $string ) {
+		return '/' . ltrim( $string, '/' );
+	}
+
+	/**
+	 * Enqueue the itsec_util script.
+	 *
+	 * Will only be included once per page.
+	 */
+	public static function enqueue_util() {
+
+		static $enqueued = false;
+
+		if ( $enqueued ) {
+			return;
+		}
+
+		$translations = array(
+			'ajax_invalid'      => new WP_Error( 'itsec-settings-page-invalid-ajax-response', __( 'An "invalid format" error prevented the request from completing as expected. The format of data returned could not be recognized. This could be due to a plugin/theme conflict or a server configuration issue.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_forbidden'    => new WP_Error( 'itsec-settings-page-forbidden-ajax-response: %1$s "%2$s"', __( 'A "request forbidden" error prevented the request from completing as expected. The server returned a 403 status code, indicating that the server configuration is prohibiting this request. This could be due to a plugin/theme conflict or a server configuration issue. Please try refreshing the page and trying again. If the request continues to fail, you may have to alter plugin settings or server configuration that could account for this AJAX request being blocked.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_not_found'    => new WP_Error( 'itsec-settings-page-not-found-ajax-response: %1$s "%2$s"', __( 'A "not found" error prevented the request from completing as expected. The server returned a 404 status code, indicating that the server was unable to find the requested admin-ajax.php file. This could be due to a plugin/theme conflict, a server configuration issue, or an incomplete WordPress installation. Please try refreshing the page and trying again. If the request continues to fail, you may have to alter plugin settings, alter server configurations, or reinstall WordPress.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_server_error' => new WP_Error( 'itsec-settings-page-server-error-ajax-response: %1$s "%2$s"', __( 'A "internal server" error prevented the request from completing as expected. The server returned a 500 status code, indicating that the server was unable to complete the request due to a fatal PHP error or a server problem. This could be due to a plugin/theme conflict, a server configuration issue, a temporary hosting issue, or invalid custom PHP modifications. Please check your server\'s error logs for details about the source of the error and contact your hosting company for assistance if required.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_unknown'      => new WP_Error( 'itsec-settings-page-ajax-error-unknown: %1$s "%2$s"', __( 'An unknown error prevented the request from completing as expected. This could be due to a plugin/theme conflict or a server configuration issue.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_timeout'      => new WP_Error( 'itsec-settings-page-ajax-error-timeout: %1$s "%2$s"', __( 'A timeout error prevented the request from completing as expected. The site took too long to respond. This could be due to a plugin/theme conflict or a server configuration issue.', 'it-l10n-ithemes-security-pro' ) ),
+			'ajax_parsererror'  => new WP_Error( 'itsec-settings-page-ajax-error-parsererror: %1$s "%2$s"', __( 'A parser error prevented the request from completing as expected. The site sent a response that jQuery could not process. This could be due to a plugin/theme conflict or a server configuration issue.', 'it-l10n-ithemes-security-pro' ) ),
+		);
+
+		foreach ( $translations as $i => $translation ) {
+			$messages = ITSEC_Response::get_error_strings( $translation );
+
+			if ( $messages ) {
+				$translations[ $i ] = $messages[0];
+			}
+		}
+
+		wp_enqueue_script( 'itsec-util', plugins_url( 'admin-pages/js/util.js', __FILE__ ), array( 'jquery' ), ITSEC_Core::get_plugin_build(), true );
+		wp_localize_script( 'itsec-util', 'itsec_util', array(
+			'ajax_action'  => 'itsec_settings_page',
+			'ajax_nonce'   => wp_create_nonce( 'itsec-settings-nonce' ),
+			'translations' => $translations,
+		) );
+
+		$enqueued = true;
+	}
+
+	/**
+	 * Replace the prefix of a target string with another prefix.
+	 *
+	 * If the given target does not start with the current prefix, the string
+	 * will be returned unmodified.
+	 *
+	 * @param string $target      String to perform replacement on.
+	 * @param string $current     The current prefix.
+	 * @param string $replacement The new prefix.
+	 *
+	 * @return string
+	 */
+	public static function replace_prefix( $target, $current, $replacement ) {
+		if ( 0 !== strpos( $target, $current ) ) {
+			return $target;
+		}
+
+		$stripped = substr( $target, strlen( $current ) );
+
+		return $replacement . $stripped;
 	}
 }

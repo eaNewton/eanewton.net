@@ -6,13 +6,14 @@
  *
  * @package Two_Factor
  */
-class Two_Factor_Backup_Codes extends Two_Factor_Provider {
+class Two_Factor_Backup_Codes extends Two_Factor_Provider implements ITSEC_Two_Factor_Provider_On_Boardable {
 
 	/**
 	 * The user meta backup codes key.
 	 * @type string
 	 */
 	const BACKUP_CODES_META_KEY = '_two_factor_backup_codes';
+	const TEMP_FLAG_META_KEY = '_itsec_two_factor_backup_codes_temp';
 
 	/**
 	 * The number backup codes.
@@ -314,5 +315,73 @@ class Two_Factor_Backup_Codes extends Two_Factor_Provider {
 
 	public function description() {
 		echo '<p class="description">' . __( 'Provide a set of one-time use codes that can be used to login in the event the primary two-factor method is lost. Note: these codes are intended to be stored in a secure location.', 'it-l10n-ithemes-security-pro' ) . '</p>';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_dashicon() {
+		return 'backup';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_label() {
+		return esc_html__( 'Backup Codes', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_description() {
+		return esc_html__( 'A list of one-time codes you can use if you lose access to your device.', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function has_on_board_configuration() {
+		return true;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_config( WP_User $user ) {
+
+		$is_configured = get_user_meta( $user->ID, self::BACKUP_CODES_META_KEY, true ) !== '';
+
+		if ( $is_configured && ! get_user_meta( $user->ID, self::TEMP_FLAG_META_KEY, true ) ) {
+			$config = array(
+				'code_count'    => self::codes_remaining_for_user( $user ),
+				'codes'         => array(),
+				'is_configured' => true,
+			);
+		} else {
+			update_user_meta( $user->ID, self::TEMP_FLAG_META_KEY, true );
+			$config = array(
+				'codes'         => $codes = $this->generate_codes( $user ),
+				'code_count'    => count( $codes ),
+				'is_configured' => false,
+			);
+		}
+
+		return $config;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function handle_ajax_on_board( WP_User $user, array $data ) {
+		if ( $data['itsec_method'] === 'generate-backup-codes' ) {
+			$new = $this->generate_codes( $user );
+
+			wp_send_json_success( array(
+				'message'    => esc_html__( 'Codes Generated', 'it-l10n-ithemes-security-pro' ),
+				'codes'      => $new,
+				'code_count' => count( $new ),
+			) );
+		}
 	}
 }

@@ -24,6 +24,7 @@ final class ITSEC_Two_Factor_Validator extends ITSEC_Validator {
 
 		$this->sanitize_setting( 'bool', 'protect_vulnerable_users', esc_html__( 'Vulnerable User Protection', 'it-l10n-ithemes-security-pro' ) );
 		$this->sanitize_setting( 'bool', 'protect_vulnerable_site', esc_html__( 'Vulnerable Site Protection', 'it-l10n-ithemes-security-pro' ) );
+		$this->sanitize_setting( 'bool', 'disable_first_login', esc_html__( 'Disable on First Login', 'it-l10n-ithemes-security-pro' ) );
 	}
 
 	public function get_available_methods() {

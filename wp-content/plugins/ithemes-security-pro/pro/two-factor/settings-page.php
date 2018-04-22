@@ -105,6 +105,14 @@ final class ITSEC_Two_Factor_Settings_Page extends ITSEC_Module_Settings_Page {
 				<p class="description"><?php esc_html_e( 'Require all users to use two-factor when logging in if the site is vulnerable, such as running outdated or software known to be vulnerable. Enabling this feature is highly recommended.', 'it-l10n-ithemes-security-pro' ); ?></p>
 			</td>
 		</tr>
+		<tr>
+			<th scope="row"><label for="itsec-two-factor-disable_first_login"><?php esc_html_e( 'Disable on First Login', 'it-l10n-ithemes-security-pro' ); ?></label></th>
+			<td>
+				<?php $form->add_checkbox( 'disable_first_login' ); ?>
+				<label for="itsec-two-factor-disable_first_login"><?php esc_html_e( "Don't require a two-factor code when a user first logs in..", 'it-l10n-ithemes-security-pro' ); ?></label>
+				<p class="description"><?php esc_html_e( 'This simplifies the sign up flow for users that require two-factor to be enabled for their account.', 'it-l10n-ithemes-security-pro' ); ?></p>
+			</td>
+		</tr>
 	</table>
 <?php
 

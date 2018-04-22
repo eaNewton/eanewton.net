@@ -239,7 +239,7 @@ final class ITSEC_Log {
 		return array(
 			'critical-issue' => esc_html__( 'Critical Issue', 'it-l10n-ithemes-security-pro' ),
 			'action'         => esc_html__( 'Action', 'it-l10n-ithemes-security-pro' ),
-			'fatal-error'    => esc_html__( 'Fatal Error', 'it-l10n-ithemes-security-pro' ),
+			'fatal'          => esc_html__( 'Fatal Error', 'it-l10n-ithemes-security-pro' ),
 			'error'          => esc_html__( 'Error', 'it-l10n-ithemes-security-pro' ),
 			'warning'        => esc_html__( 'Warning', 'it-l10n-ithemes-security-pro' ),
 			'notice'         => esc_html__( 'Notice', 'it-l10n-ithemes-security-pro' ),

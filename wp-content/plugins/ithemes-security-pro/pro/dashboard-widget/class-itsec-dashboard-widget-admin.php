@@ -25,7 +25,6 @@ class ITSEC_Dashboard_Widget_Admin {
 			add_action( 'wp_dashboard_setup', array( $this, 'wp_dashboard_setup' ) );
 			add_action( 'wp_ajax_itsec_release_dashboard_lockout', array( $this, 'itsec_release_dashboard_lockout' ) );
 			add_action( 'wp_ajax_itsec_dashboard_summary_postbox_toggle', array( $this, 'itsec_dashboard_summary_postbox_toggle' ) );
-			add_action( 'wp_ajax_itsec_dashboard_file_check', array( $this, 'run_file_check' ) );
 
 		}
 	}
@@ -41,8 +40,19 @@ class ITSEC_Dashboard_Widget_Admin {
 
 		if ( isset( get_current_screen()->id ) && ( strpos( get_current_screen()->id, 'dashboard' ) !== false ) ) {
 
+			$deps = array( 'jquery' );
+
+			if ( ITSEC_Modules::is_active( 'file-change' ) ) {
+				if ( ! class_exists( 'ITSEC_File_Change_Admin' ) ) {
+					ITSEC_Modules::load_module_file( 'admin.php', 'file-change' );
+				}
+
+				ITSEC_File_Change_Admin::enqueue_scanner();
+				$deps[] = 'itsec-file-change-scanner';
+			}
+
 			wp_enqueue_style( 'itsec_dashboard_widget_css', plugins_url( 'css/admin-dashboard-widget.css', __FILE__ ), array(), ITSEC_Core::get_plugin_build() );
-			wp_enqueue_script( 'itsec_dashboard_widget_js', plugins_url( 'js/admin-dashboard-widget.js', __FILE__ ), array( 'jquery' ), ITSEC_Core::get_plugin_build() );
+			wp_enqueue_script( 'itsec_dashboard_widget_js', plugins_url( 'js/admin-dashboard-widget.js', __FILE__ ), $deps, ITSEC_Core::get_plugin_build() );
 
 			wp_localize_script( 'itsec_dashboard_widget_js', 'itsec_dashboard_widget_js', array(
 				'host'          => '<p>' . __( 'Currently no hosts are locked out of this website.', 'it-l10n-ithemes-security-pro' ) . '</p>',
@@ -177,40 +187,24 @@ class ITSEC_Dashboard_Widget_Admin {
 	 * @return void
 	 */
 	private function file_scan() {
-		if ( ITSEC_Modules::is_active( 'file-change' ) ) {
-			$file_settings = ITSEC_Modules::get_settings( 'file-change' );
-
-			echo '<p><input type="button" id="itsec_dashboard_one_time_file_check" class="button-primary" value="' . ( isset( $file_settings['split'] ) && $file_settings['split'] === true ? __( 'Scan Next File Chunk', 'it-l10n-ithemes-security-pro' ) : __( 'Scan Files Now', 'it-l10n-ithemes-security-pro' ) ) . '" /></p>';
-			echo '<div id="itsec_dashboard_one_time_file_check_results"></div>';
-		}
-	}
-
-	public function run_file_check() {
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( $_POST['nonce'] ), 'itsec_dashboard_scan_files' ) ) {
-			die ( __( 'Security error', 'it-l10n-ithemes-security-pro' ) );
+		if ( ! ITSEC_Modules::is_active( 'file-change' ) ) {
+			return;
 		}
 
 		ITSEC_Modules::load_module_file( 'scanner.php', 'file-change' );
 
-		$result = ITSEC_File_Change_Scanner::run_scan( false );
-
-		if ( true === $result ) {
-			$type = 'error';
-			$message = sprintf( __( 'Changes were found. View details on the <a href="%1$s">logs page</a>.', 'it-l10n-ithemes-security-pro' ), ITSEC_Core::get_logs_page_url( 'file_change' ) );
-		} else if ( false === $result ) {
-			$type = 'updated fade';
-			$message = __( 'No changes were found.', 'it-l10n-ithemes-security-pro' );
-		} else if ( -1 === $result ) {
-			$type = 'error';
-			$message = __( 'A file scan is currently in progress. Please wait a few minutes before attempting another file scan.', 'it-l10n-ithemes-security-pro' );
+		if ( ITSEC_File_Change_Scanner::is_running() ) {
+			$text     = esc_attr__( 'Scan in Progress', 'it-l10n-ithemes-security-pro' );
+			$disabled = 'disabled';
+			$class    = 'button-secondary';
 		} else {
-			$type = 'error';
-			$message = sprintf( __( 'The file scanner returned an unknown response of type <code>%1$s</code>.', 'it-l10n-ithemes-security-pro' ), gettype( $result ) );
+			$text     = esc_attr__( 'Scan Files Now', 'it-l10n-ithemes-security-pro' );
+			$disabled = '';
+			$class    = 'button-primary';
 		}
 
-		$message = "<div class='$type inline'><p><strong>$message</strong></p></div>";
-
-		wp_send_json( $message );
+		echo "<p><input type=\"button\" id=\"itsec_dashboard_one_time_file_check\" {$disabled} class=\"{$class}\" value=\"{$text}\" /></p>";
+		echo '<div id="itsec_dashboard_one_time_file_check_results"></div>';
 	}
 
 	/**

@@ -8,7 +8,7 @@
 /**
  * Class Two_Factor_Totp
  */
-class Two_Factor_Totp extends Two_Factor_Provider {
+class Two_Factor_Totp extends Two_Factor_Provider implements ITSEC_Two_Factor_Provider_On_Boardable {
 
 	public $recommended = true;
 
@@ -409,16 +409,20 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 	 * @param string $name  The name to display in the Authentication app.
 	 * @param string $key   The secret key to share with the Authentication app.
 	 * @param string $title The title to display in the Authentication app.
+	 * @param array  $opts Additional options.
 	 *
 	 * @return string A URL to use as an img src to display the QR code
 	 */
-	public function get_google_qr_code( $name, $key, $title = null ) {
+	public function get_google_qr_code( $name, $key, $title = null, $opts = array() ) {
 		// rawurlencode() $name and $title because iOS chokes otherwise
 		$google_url = urlencode( 'otpauth://totp/' . rawurlencode( $name ) . '?secret=' . $key );
 		if ( isset( $title ) ) {
 			$google_url .= urlencode( '&issuer=' . rawurlencode( $title ) );
 		}
-		return 'https://chart.googleapis.com/chart?chs=200x200&chld=M|0&cht=qr&chl=' . $google_url;
+
+		$size = isset( $opts['size'] ) ? absint( $opts['size'] ) : 200;
+
+		return "https://chart.googleapis.com/chart?chs={$size}x{$size}&chld=M|0&cht=qr&chl={$google_url}";
 	}
 
 	/**
@@ -518,4 +522,77 @@ class Two_Factor_Totp extends Two_Factor_Provider {
 		echo '<p class="description">' . sprintf( wp_kses( __( 'Use a two-factor mobile app such as <a href="%1$s">Authy</a> or Google Authenticator (<a href="%2$s">Android</a>, <a href="%3$s">iOS</a>). The mobile app generates a time-sensitive code that must be supplied when logging in.', 'it-l10n-ithemes-security-pro' ), array( 'a' => array( 'href' => array() ) ) ), esc_url( 'https://www.authy.com/app/mobile/' ), esc_url( 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en' ), esc_url( 'https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8' ) ) . '</p>';
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_dashicon() {
+		return 'smartphone';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_label() {
+		return esc_html__( 'Mobile App', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_description() {
+		return esc_html__( 'Log in to WordPress using a mobile app like Authy or Google Authenticator.', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function has_on_board_configuration() {
+		return true;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_config( WP_User $user ) {
+
+		$key  = $this->get_key( $user );
+		$blog = get_bloginfo( 'name', 'display' );
+
+		return array(
+			'secret' => $key->key,
+			'qr'     => $this->get_google_qr_code( $blog . ':' . $user->user_login, $key->key, $blog, array( 'size' => 300 ) )
+		);
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function handle_ajax_on_board( WP_User $user, array $data ) {
+		if ( $data['itsec_method'] !== 'verify-totp-code' ) {
+			return;
+		}
+
+		if ( ! isset( $data['itsec_totp_secret'], $data['itsec_totp_code'] ) ) {
+			wp_send_json_error( array(
+				'message' => esc_html__( 'Invalid Request Format', 'it-l10n-ithemes-security-pro' ),
+			) );
+		}
+
+		$secret = $data['itsec_totp_secret'];
+
+		if ( $this->_is_valid_authcode( $secret, $data['itsec_totp_code'] ) ) {
+			if ( $secret !== get_user_meta( $user->ID, self::SECRET_META_KEY, true ) && ! update_user_meta( $user->ID, self::SECRET_META_KEY, $secret ) ) {
+				wp_send_json_error( array(
+					'message' => esc_html__( 'Unable to save two-factor secret.', 'it-l10n-ithemes-security-pro' ),
+				) );
+			}
+			wp_send_json_success( array(
+				'message' => esc_html__( 'Success!', 'it-l10n-ithemes-security-pro' ),
+			) );
+		} else {
+			wp_send_json_error( array(
+				'message' => esc_html__( 'The code you supplied is not valid.', 'it-l10n-ithemes-security-pro' ),
+			) );
+		}
+	}
 }

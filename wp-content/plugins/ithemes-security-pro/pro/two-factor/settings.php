@@ -17,6 +17,7 @@ final class ITSEC_Two_Factor_Settings extends ITSEC_Settings {
 			'protect_user_type_roles'  => array(),
 			'protect_vulnerable_users' => false,
 			'protect_vulnerable_site'  => false,
+			'disable_first_login'      => false,
 		);
 	}
 }

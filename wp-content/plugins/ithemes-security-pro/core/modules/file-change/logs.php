@@ -19,6 +19,16 @@ final class ITSEC_File_Change_Logs {
 			} else {
 				$entry['description'] = esc_html__( 'Changes Found', 'it-l10n-ithemes-security-pro' );
 			}
+		} elseif ( 'attempting-recovery' === $code ) {
+			$entry['description'] = esc_html__( 'Attempting Recovery', 'it-l10n-ithemes-security-pro' );
+		} elseif ( 'recovery-failed-no-step' === $code ) {
+			$entry['description'] = esc_html__( 'Recovery Failed: No Step', 'it-l10n-ithemes-security-pro' );
+		} elseif ( 'recovery-failed-too-many-retries' === $code ) {
+			$entry['description'] = esc_html__( 'Recovery Failed: Retry Limit', 'it-l10n-ithemes-security-pro' );
+		} elseif ( 'recovery-scheduled' === $code ) {
+			$entry['description'] = esc_html__( 'Recovery Scheduled', 'it-l10n-ithemes-security-pro' );
+		} elseif ( 'file-scan-aborted' === $code ) {
+			$entry['description'] = esc_html__( 'Scan Failed', 'it-l10n-ithemes-security-pro' );
 		}
 
 		return $entry;
@@ -30,11 +40,18 @@ final class ITSEC_File_Change_Logs {
 		$details['module']['content'] = $entry['module_display'];
 		$details['description']['content'] = $entry['description'];
 
-		if ( 'process-start' !== $entry['type'] ) {
+		if ( 'changes-found' === $code || 'no-changes-found' === $code ) {
 			$details['memory'] = array(
 				'header'  => esc_html__( 'Memory Used', 'it-l10n-ithemes-security-pro' ),
 				'content' => sprintf( esc_html_x( '%s MB', 'Megabytes of memory used', 'it-l10n-ithemes-security-pro' ), $entry['data']['memory'] ),
 			);
+
+			if ( ! empty( $entry['data']['memory_peak'] ) ) {
+				$details['memory_total'] = array(
+					'header'  => esc_html__( 'Total Memory', 'it-l10n-ithemes-security-pro' ),
+					'content' => sprintf( esc_html_x( '%s MB', 'Megabytes of memory used', 'it-l10n-ithemes-security-pro' ), $entry['data']['memory_peak'] ),
+				);
+			}
 
 			$types = array(
 				'added'   => esc_html__( 'Added', 'it-l10n-ithemes-security-pro' ),

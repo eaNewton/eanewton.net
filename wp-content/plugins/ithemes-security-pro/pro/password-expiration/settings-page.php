@@ -19,6 +19,21 @@ final class ITSEC_Password_Expiration_Settings_Page extends ITSEC_Module_Setting
 
 	}
 
+	public function enqueue_scripts_and_styles() {
+		wp_enqueue_script( 'itsec-password-expiration-settings', plugin_dir_url( __FILE__ ) . 'js/settings-page.js', array( 'jquery', 'itsec-util' ), ITSEC_Core::get_plugin_build() );
+	}
+
+	public function handle_ajax_request( $data ) {
+
+		if ( 'force-expiration' === $data['method'] ) {
+			$response=ITSEC_Modules::set_setting( 'password-expiration', 'expire_force', true );
+
+			if ( $response['saved'] ) {
+				ITSEC_Response::add_message( esc_html__( 'Passwords will be reset on next login.', 'it-l10n-ithemes-security-pro' ) );
+			}
+		}
+	}
+
 	protected function render_settings( $form ) {
 		$roles = array(
 			'administrator' => translate_user_role( 'Administrator' ),
@@ -31,6 +46,11 @@ final class ITSEC_Password_Expiration_Settings_Page extends ITSEC_Module_Setting
 		$form->set_option( 'expire_force', false );
 
 ?>
+	<div class="hide-if-no-js">
+		<p><?php _e( 'Press the button below to force all users to change their password upon their next login.', 'it-l10n-ithemes-security-pro' ); ?></p>
+		<p><?php $form->add_button( 'force-expiration', array( 'value' => esc_html__( 'Force Password Change', 'it-l10n-ithemes-security-pro' ), 'class' => 'button' ) ); ?></p>
+		<div id="itsec_password_expiration_status"></div>
+	</div>
 	<table class="form-table">
 		<tr>
 			<th scope="row"><label for="itsec-password-expiration-expire_role"><?php _e( 'Select Minimum Role for Password Expiration', 'it-l10n-ithemes-security-pro' ); ?></label></th>
@@ -40,14 +60,6 @@ final class ITSEC_Password_Expiration_Settings_Page extends ITSEC_Module_Setting
 				<label for="itsec-password-expiration-expire_role"><?php _e( 'Minimum role at which password expiration is enforced.', 'it-l10n-ithemes-security-pro' ); ?></label>
 				<p class="description"><?php _e( 'We suggest enabling this setting for all users, but it may lead to users forgetting their passwords. The minimum role option above allows you to select the lowest user role to apply strong password generation.', 'it-l10n-ithemes-security-pro' ); ?></p>
 				<p class="description"><?php _e( 'For more information on WordPress roles and capabilities please see <a href="http://codex.wordpress.org/Roles_and_Capabilities" target="_blank" rel="noopener noreferrer">http://codex.wordpress.org/Roles_and_Capabilities</a>.', 'it-l10n-ithemes-security-pro' ); ?>
-			</td>
-		</tr>
-		<tr>
-			<th scope="row"><label for="itsec-password-expiration-expire_force"><?php _e( 'Force Password Change on Next Login', 'it-l10n-ithemes-security-pro' ); ?></label></th>
-			<td>
-				<?php $form->add_checkbox( 'expire_force' ); ?>
-				<label for="itsec-password-expiration-expire_force"><?php _e( 'Force password change', 'it-l10n-ithemes-security-pro' ); ?></label>
-				<p class="description"><?php _e( 'Checking this box will force all users to change their password upon their next login.', 'it-l10n-ithemes-security-pro' ); ?></p>
 			</td>
 		</tr>
 		<tr>

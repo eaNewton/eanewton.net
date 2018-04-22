@@ -166,6 +166,26 @@ class ITSEC_Settings_Command extends WP_CLI_Command {
 	}
 
 	/**
+	 * Reset the settings for a module.
+	 *
+	 * ## OPTIONS
+	 *
+	 * <module>
+	 * : The module's settings to reset.
+	 */
+	public function reset( $args, $assoc_args ) {
+
+		list( $module ) = $args;
+
+		$this->assert_valid_module( $module );
+
+		$defaults = ITSEC_Modules::get_defaults( $module );
+		ITSEC_Modules::set_settings( $module, $defaults );
+
+		WP_CLI::success( 'Settings reset.' );
+	}
+
+	/**
 	 * Pretty print a table.
 	 *
 	 * @param array $values

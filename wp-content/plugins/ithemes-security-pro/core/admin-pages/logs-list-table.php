@@ -319,7 +319,7 @@ final class ITSEC_Logs_List_Table extends ITSEC_WP_List_Table {
 			'important'      => esc_html__( 'Important Events (%s)', 'it-l10n-ithemes-security-pro' ),
 			'all'            => esc_html__( 'All Events (%s)', 'it-l10n-ithemes-security-pro' ),
 			'critical-issue' => esc_html__( 'Critical Issues (%s)', 'it-l10n-ithemes-security-pro' ),
-			'fatal-error'    => esc_html__( 'Fatal Errors (%s)', 'it-l10n-ithemes-security-pro' ),
+			'fatal'          => esc_html__( 'Fatal Errors (%s)', 'it-l10n-ithemes-security-pro' ),
 			'error'          => esc_html__( 'Errors (%s)', 'it-l10n-ithemes-security-pro' ),
 			'warning'        => esc_html__( 'Warnings (%s)', 'it-l10n-ithemes-security-pro' ),
 			'action'         => esc_html__( 'Actions (%s)', 'it-l10n-ithemes-security-pro' ),
@@ -350,7 +350,7 @@ final class ITSEC_Logs_List_Table extends ITSEC_WP_List_Table {
 
 			$views[$type] = sprintf( $description, $counts[$type] );
 
-			if ( in_array( $type, array( 'critical-issue', 'fatal-error', 'error', 'warning' ) ) ) {
+			if ( in_array( $type, array( 'critical-issue', 'fatal', 'error', 'warning' ) ) ) {
 				$important_count += $counts[$type];
 			}
 

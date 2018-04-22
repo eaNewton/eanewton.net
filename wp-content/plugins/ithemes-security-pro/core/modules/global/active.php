@@ -164,3 +164,18 @@ function itsec_cron_test_callback( $time ) {
 }
 
 add_action( 'itsec_cron_test', 'itsec_cron_test_callback' );
+
+/**
+ * Record that a user has logged-in.
+ *
+ * @param string  $username
+ * @param WP_User $user
+ */
+function itsec_record_first_login( $username, $user ) {
+
+	if ( ! get_user_meta( $user->ID, '_itsec_has_logged_in', true ) ) {
+		update_user_meta( $user->ID, '_itsec_has_logged_in', ITSEC_Core::get_current_time_gmt() );
+	}
+}
+
+add_action( 'wp_login', 'itsec_record_first_login', 15, 2 );

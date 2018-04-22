@@ -255,15 +255,36 @@ final class ITSEC_Debug {
 			return '<strong>null</strong>';
 		}
 
-		if ( is_object( $data ) ) {
-			$class_name = get_class( $data );
+		if ( is_object( $data ) || 'object' === gettype( $data ) ) {
+			if ( ! is_object( $data ) || '__PHP_Incomplete_Class' === get_class( $data ) ) {
+				// Special handling for objects for classes that are not loaded.
+				$vars = get_object_vars( $data );
+
+				$class_name = $vars['__PHP_Incomplete_Class_Name'];
+			} else {
+				$class_name = get_class( $data );
+			}
+
 			$retval = "<strong>Object</strong> $class_name";
 
 			if ( ! $expand_objects || ( $depth == $max_depth ) ) {
 				return $retval;
 			}
 
-			$vars = get_object_vars( $data );
+			if ( isset( $vars ) ) {
+				// Special handling for objects for classes that are not loaded.
+				unset( $vars['__PHP_Incomplete_Class_Name'] );
+				$new_vars = array();
+
+				foreach ( $vars as $key => $val ) {
+					$key = substr( $key, strlen( $class_name ) + 2 );
+					$new_vars[$key] = $val;
+				}
+
+				$vars = $new_vars;
+			} else {
+				$vars = get_object_vars( $data );
+			}
 
 			if ( empty( $vars ) ) {
 				$vars = '';

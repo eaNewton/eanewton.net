@@ -6,7 +6,7 @@
  *
  * @package Two_Factor
  */
-class Two_Factor_Email extends Two_Factor_Provider {
+class Two_Factor_Email extends Two_Factor_Provider implements ITSEC_Two_Factor_Provider_On_Boardable {
 
 	/**
 	 * The user meta token key.
@@ -202,5 +202,47 @@ class Two_Factor_Email extends Two_Factor_Provider {
 
 	public function description() {
 		echo '<p class="description">' . __( 'Time-sensitive codes are supplied via email to the email address associated with the user\'s account. Note: This WordPress site must support sending emails for this method to work (for example, sending WordPress-generated emails such as password reset and new account emails).', 'it-l10n-ithemes-security-pro' ) . '</p>';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_dashicon() {
+		return 'email-alt';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_label() {
+		return esc_html__( 'Email', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_description() {
+		return esc_html__( 'Receive an email every time you login.', 'it-l10n-ithemes-security-pro' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function has_on_board_configuration() {
+		return false;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function get_on_board_config( WP_User $user ) {
+		return array();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function handle_ajax_on_board( WP_User $user, array $data ) {
+
 	}
 }

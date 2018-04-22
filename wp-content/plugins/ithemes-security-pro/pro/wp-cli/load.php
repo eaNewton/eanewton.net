@@ -12,6 +12,7 @@ function itsec_load_wp_cli() {
 	WP_CLI::add_command( 'itsec', 'ITSEC_WP_CLI_Command_ITSEC' );
 
 	require_once( dirname( __FILE__ ) . '/scheduler.php' );
+	require_once( dirname( __FILE__ ) . '/modules.php' );
 	require_once( dirname( __FILE__ ) . '/settings.php' );
 
 	$always_active = ITSEC_Modules::get_always_active_modules();

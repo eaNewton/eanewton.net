@@ -12,7 +12,7 @@ class ITSEC_Password_Expiration {
 		add_filter( 'itsec_password_change_requirement_description_for_force', array( $this, 'force_reason' ) );
 		add_action( 'itsec_validate_password', array( $this, 'validate_password' ), 10, 4 );
 
-		add_action( 'wp_login', array( $this, 'wp_login' ), 11, 2 );
+		add_action( 'wp_login', array( $this, 'wp_login' ), 9, 2 );
 
 	}
 

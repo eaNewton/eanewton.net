@@ -35,6 +35,8 @@ if ( ! class_exists( 'ITSEC_File_Change_Setup' ) ) {
 
 			wp_clear_scheduled_hook( 'itsec_file_check' );
 
+			ITSEC_Core::get_scheduler()->unschedule_single( 'file-change', null );
+			ITSEC_Core::get_scheduler()->unschedule_single( 'file-change-fast', null );
 		}
 
 		/**
@@ -57,6 +59,10 @@ if ( ! class_exists( 'ITSEC_File_Change_Setup' ) ) {
 			delete_site_option( 'itsec_local_file_list_6' );
 			delete_site_option( 'itsec_file_change_warning' );
 
+			require_once( dirname( __FILE__ ) .'/scanner.php' );
+			delete_site_option( ITSEC_File_Change_Scanner::STORAGE );
+			delete_site_option( ITSEC_File_Change_Scanner::FILE_LIST );
+			delete_site_option( ITSEC_File_Change_Scanner::DESTROYED );
 		}
 
 		/**
@@ -153,10 +159,161 @@ if ( ! class_exists( 'ITSEC_File_Change_Setup' ) ) {
 				wp_clear_scheduled_hook( 'itsec_execute_file_check_cron' );
 			}
 
+			if ( $itsec_old_version < 4088 ) {
+				$types = ITSEC_Modules::get_setting( 'file-change', 'types' );
+				$defaults = array( '.jpg', '.jpeg', '.png', '.log', '.mo', '.po' );
+
+				sort( $types );
+				sort( $defaults );
+
+				$update = false;
+
+				if ( $types === $defaults ) {
+					$update = true;
+				} else {
+					$defaults[] = '.lock';
+
+					sort( $defaults );
+
+					if ( $types === $defaults ) {
+						$update = true;
+					}
+				}
+
+				if ( $update ) {
+					ITSEC_Modules::set_setting( 'file-change', 'types', ITSEC_Modules::get_default( 'file-change', 'types' ) );
+				}
+
+				require_once( dirname( __FILE__ ) .'/scanner.php' );
+
+				$options = array(
+					'itsec_local_file_list',
+					'itsec_local_file_list_0',
+					'itsec_local_file_list_1',
+					'itsec_local_file_list_2',
+					'itsec_local_file_list_3',
+					'itsec_local_file_list_4',
+					'itsec_local_file_list_5',
+					'itsec_local_file_list_6',
+				);
+				$file_list = array();
+
+				$home = get_home_path();
+
+				foreach ( $options as $option ) {
+					$opt_list = get_site_option( $option );
+
+					if ( $opt_list && is_array( $opt_list ) ) {
+						foreach ( $opt_list as $file => $attr ) {
+							$file_list[ $home . $file ] = $attr;
+						}
+					}
+				}
+
+				if ( $file_list ) {
+					ITSEC_File_Change_Scanner::record_file_list( $file_list );
+				}
+
+				ITSEC_Core::get_scheduler()->unschedule( 'file-change' );
+				ITSEC_File_Change_Scanner::schedule_start( false );
+			}
+
+			if ( $itsec_old_version < 4090 ) {
+				require_once( dirname( __FILE__ ) .'/scanner.php' );
+
+				ITSEC_Core::get_scheduler()->unschedule_single( 'file-change', null );
+				ITSEC_Core::get_scheduler()->unschedule_single( 'file-change-fast', null );
+				delete_site_option( ITSEC_File_Change_Scanner::STORAGE );
+
+				$file_list = ITSEC_File_Change_Scanner::get_file_list_to_compare();
+
+				if ( $file_list ) {
+					delete_site_option( ITSEC_File_Change_Scanner::FILE_LIST );
+					ITSEC_File_Change_Scanner::record_file_list( $this->migrate_file_attr( $file_list ) );
+				}
+
+				if ( $latest_changes = ITSEC_Modules::get_setting( 'file-change', 'latest_changes' ) ) {
+
+					if ( ! empty( $latest_changes['added'] ) && is_array( $latest_changes['added'] ) ) {
+						$latest_changes['added'] = $this->migrate_file_attr( $latest_changes['added'] );
+					} else {
+						$latest_changes['added'] = array();
+					}
+
+					if ( ! empty( $latest_changes['changed'] ) && is_array( $latest_changes['changed'] ) ) {
+						$latest_changes['changed'] = $this->migrate_file_attr( $latest_changes['changed'] );
+					} else {
+						$latest_changes['changed'] = array();
+					}
+
+					if ( ! empty( $latest_changes['removed'] ) && is_array( $latest_changes['removed'] ) ) {
+						$latest_changes['removed'] = $this->migrate_file_attr( $latest_changes['removed'] );
+					} else {
+						$latest_changes['removed'] = array();
+					}
+
+					ITSEC_Modules::set_setting( 'file-change', 'latest_changes', $latest_changes );
+				}
+
+				ITSEC_File_Change_Scanner::schedule_start( false );
+			}
+
 		}
 
-	}
+		/**
+		 * Migrate file attributes to the shorter format.
+		 *
+		 * @param array $files
+		 *
+		 * @return array
+		 */
+		private function migrate_file_attr( $files ) {
 
+			$changed = array();
+
+			foreach ( $files as $file => $attr ) {
+				$migrated = array(
+					'h' => $attr['h'],
+					'd' => $attr['d'],
+				);
+
+				if ( isset( $attr['s'] ) ) {
+					$migrated['s'] = $attr['s'];
+				} elseif ( isset( $attr['severity'] ) ) {
+					$migrated['s'] = $attr['severity'];
+				}
+
+				if ( isset( $attr['t'] ) ) {
+					$migrated['t'] = $attr['t'];
+				} elseif ( isset( $attr['type'] ) ) {
+					switch ( $attr['type'] ) {
+						case 'added':
+							$migrated['t'] = ITSEC_File_Change_Scanner::T_ADDED;
+							break;
+						case 'changed':
+							$migrated['t'] = ITSEC_File_Change_Scanner::T_CHANGED;
+							break;
+						case 'removed':
+							$migrated['t'] = ITSEC_File_Change_Scanner::T_REMOVED;
+							break;
+						default:
+							$migrated['t'] = $attr['type'];
+							break;
+					}
+				}
+
+				if ( isset( $attr['p'] ) ) {
+					$migrated['p'] = $attr['p'];
+				} elseif ( isset( $attr['package'] ) ) {
+					$migrated['p'] = $attr['package'];
+				}
+
+				$changed[ $file ] = $migrated;
+			}
+
+			return $changed;
+		}
+	}
 }
 
 new ITSEC_File_Change_Setup();
