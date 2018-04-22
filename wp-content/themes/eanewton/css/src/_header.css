@@ -101,6 +101,11 @@ header#masthead {
 
             .menu-item {
               padding: 10px 5px;
+
+              a {
+                display: block;
+                color: map(colors, black, lightest);
+              }
             }
           }
 
