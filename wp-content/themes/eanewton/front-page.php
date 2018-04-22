@@ -12,27 +12,27 @@
 ?>
 
 <div class="grid-container homepage-grid" style="background-image:url('<?php echo $featuredImage ?>')">
-  <div class="grid-item item1">1</div>
-  <div class="grid-item item2">2</div>
-  <div class="grid-item item3">3</div>
-  <div class="grid-item item4">4</div>
+  <div class="grid-item item1"></div>
+  <div class="grid-item item2"></div>
+  <div class="grid-item item3"></div>
+  <div class="grid-item item4"></div>
   <div class="grid-item item5">
     <?php echo $content; ?>
   </div>
-  <div class="grid-item item6">6</div>
-  <div class="grid-item item7">7</div>
-  <div class="grid-item item8">8</div>
-  <div class="grid-item item9">9</div>
-  <div class="grid-item item10">10</div>
-  <div class="grid-item item11">11</div>
-  <div class="grid-item item12">12</div>
-  <div class="grid-item item13">13</div>
+  <div class="grid-item item6"></div>
+  <div class="grid-item item7"></div>
+  <div class="grid-item item8"></div>
+  <div class="grid-item item9"></div>
+  <div class="grid-item item10"></div>
+  <div class="grid-item item11"></div>
+  <div class="grid-item item12"></div>
+  <div class="grid-item item13"></div>
   <div class="grid-item item14">
     <div class="button-container">
-      <a class="button" href="/work">Lorem ipsum</a>
+      <a class="button" href="/work">see some projects</a>
     </div>
   </div>
-  <div class="grid-item item15">15</div>
+  <div class="grid-item item15"></div>
 </div>
 
 <?php get_footer(); ?>

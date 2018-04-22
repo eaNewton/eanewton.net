@@ -103,6 +103,10 @@ header#masthead {
               padding: 10px 5px;
             }
           }
+
+          @media (max-width: 767px) {
+            top: 75px;
+          }
         }
       }
 
