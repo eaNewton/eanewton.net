@@ -38,3 +38,12 @@ body, p {
 p {
   margin: 0;
 }
+
+a {
+  color: map(colors, sea, base);
+  transition: 0.2s all ease-in-out;
+
+  &:hover {
+    color: #70a4ba;
+  }
+}

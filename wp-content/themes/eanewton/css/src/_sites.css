@@ -12,6 +12,16 @@
     }
 
     .title-container {
+      .site-title {
+        color: map(colors, black, lightest);
+        letter-spacing: 0;
+        text-transform: capitalize;
+
+        &:hover {
+          opacity: 0.69;
+        }
+      }
+
       @media (max-width: 767px) {
         text-align: center;
       }

@@ -24,7 +24,7 @@ if ( have_posts() ) : ?>
         </a>
       </div>
       <div class="title-container">
-        <a href="<?php echo $url ?>" target="_blank">
+        <a class="site-title" href="<?php echo $url ?>" target="_blank">
           <?php echo get_the_title(); ?>
         </a>
       </div>
