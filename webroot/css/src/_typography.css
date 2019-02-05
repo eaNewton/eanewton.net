@@ -16,6 +16,7 @@ h4, h5, h6 {
 }
 
 p {
+  color: map(colors, black, base);
   font-family: map(fonts, secondary);
   font-size: 24px;
   font-weight: 100;

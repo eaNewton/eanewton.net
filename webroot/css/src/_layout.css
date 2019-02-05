@@ -12,6 +12,23 @@ body {
         max-width: 1104px;
         margin: 0 auto;
       }
+
+      #hero-one {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        .section-inner {
+          .button {
+            margin-top: 36px;
+          }
+
+          h1 {
+            max-width: 650px;
+            margin: 0;
+          }
+        }
+      }
     }
   }
 }

@@ -3,9 +3,9 @@ black:
 white: 
   base: '#F3F3F3'
 primary:
-  base: '#F1E0C5'
+  base: '#1E555C'
 secondary:
-  base: '#C9B79C'
+  base: '#EDB183'
 tertiary:
-  base: '#71816D'
+  base: '#F4D8CD'
 
