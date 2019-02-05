@@ -1,0 +1,11 @@
+black:
+  base: '#0A122A'
+white: 
+  base: '#F3F3F3'
+primary:
+  base: '#F1E0C5'
+secondary:
+  base: '#C9B79C'
+tertiary:
+  base: '#71816D'
+

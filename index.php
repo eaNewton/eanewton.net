@@ -8,10 +8,26 @@
     <meta name="description" content="description here">
     <meta name="keywords" content="keywords,here">
     <link rel="shortcut icon" href="favicon.ico" type="image/vnd.microsoft.icon">
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=font1|font2|etc" type="text/css">
-    <link rel="stylesheet" href="stylesheet.css" type="text/css">
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto+Slab|Roboto:100,400" type="text/css">
+    <link rel="stylesheet" href="/webroot/css/dist/style.css" type="text/css">
   </head>
   <body>
-  
+    <div id="wrap">
+      <div class="section-container">
+        <section id="hero-one" class="site-section">
+          <h1>Austin, TX-based web development</h1>
+          <div><a href="#hero-two" class="button">Let's go</a></div>
+        </section>
+        <section id="hero-two" class="site-section">
+          <h2>WUPHF.com!</h2>
+          <h3>You're falling behind...</h3>
+        </section>
+      </div>
+      <footer class="footer">
+        <div class="site-section">
+          <p>&copy; <?php echo date( 'Y' ); ?> | e. a. newton</p>
+        </div>
+      </footer>
+    </div>
   </body>
 </html>

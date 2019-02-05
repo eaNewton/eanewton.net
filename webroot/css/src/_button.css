@@ -1,0 +1,14 @@
+.button {
+  padding: 18px;
+  border: 1px solid map(colors, primary, base);
+  color: map(colors, primary, base);
+  font-weight: 100;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: 0.1s all ease-in-out;
+
+  &:hover {
+    border: 1px solid map(colors, white, base);
+    color: map(colors, white, base);
+  }
+}

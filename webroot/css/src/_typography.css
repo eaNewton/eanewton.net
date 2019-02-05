@@ -1,0 +1,27 @@
+h1, h2, h3, h4, h5, h6 {
+  font-family: map(fonts, primary);
+}
+
+h1 {
+  color: map(colors, primary, base);
+  font-size: 64px;
+}
+
+h2, h3 {
+  color: map(colors, secondary, base);
+}
+
+h4, h5, h6 {
+  color: map(colors, tertiary, base);
+}
+
+p {
+  font-family: map(fonts, secondary);
+  font-size: 24px;
+  font-weight: 100;
+}
+
+a {
+  font-family: map(fonts, secondary);
+  text-decoration: none;
+}
