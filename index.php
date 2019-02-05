@@ -13,9 +13,18 @@
   </head>
   <body>
     <div id="navigation">
-      <a href="#hero-one">X</a>
-      <a href="#hero-two">X</a>
-      <a href="#hero-three">X</a>
+      <div class="nav-dot-container">
+        <a id="nav-one" class="nav-dot" href="#hero-one"></a>
+      </div>
+      <div class="nav-dot-container">
+        <a id="nav-two" class="nav-dot" href="#hero-two"></a>
+      </div>
+      <div class="nav-dot-container">
+        <a id="nav-three" class="nav-dot" href="#hero-three"></a>
+      </div>
+      <div class="nav-dot-container">
+        <a id="nav-four" class="nav-dot" href="#hero-four"></a>
+      </div>
     </div>
     <div id="wrap">
       <div class="section-container">

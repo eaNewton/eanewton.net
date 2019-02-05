@@ -29,10 +29,7 @@ var paths = {
 var globs = {
   js: {
     src: [
-      paths.components.slick_slider + 'slick.js',
-      paths.components.featherlight + 'featherlight.js',
       paths.js.src + 'main.js',
-      paths.js.src + 'gallery.js',
     ],
     dist: {
       original: 'app.js',

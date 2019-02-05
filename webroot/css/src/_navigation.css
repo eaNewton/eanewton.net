@@ -1,4 +1,44 @@
 #navigation {
   position: fixed;
   right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+
+  .nav-dot-container {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .nav-dot {
+      content: " ";
+      width: 25px;
+      height: 25px;
+      display: inline-block;
+      border-radius: 100%;
+      transition: 0.1s all ease-in-out;
+
+      &:hover {
+        transform: scale(1.25);
+      }
+
+      &#nav-one {
+        background-color: map(colors, primary, base);
+      }
+
+      &#nav-two {
+        background-color: map(colors, secondary, base);
+      }
+
+      &#nav-three {
+        background-color: map(colors, tertiary, base);
+      }
+
+      &#nav-four {
+        background-color: map(colors, black, base);
+      }
+    }
+  }
 }

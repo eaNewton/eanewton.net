@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -9,8 +13,14 @@ body {
 
     .section-container {
       .site-section {
-        max-width: 1104px;
-        margin: 0 auto;
+        .section-inner {
+          max-width: 1104px;
+          margin: 0 auto;
+
+          @media (min-width: 768px) {
+            padding: 36px;
+          }
+        }
       }
 
       #hero-one {
@@ -19,6 +29,8 @@ body {
         align-items: center;
 
         .section-inner {
+          margin: 0 auto 0 10%;
+
           .button {
             margin-top: 36px;
           }
@@ -28,6 +40,10 @@ body {
             margin: 0;
           }
         }
+      }
+
+      #hero-two {
+        background-color: map(colors, tertiary, base);
       }
     }
   }
