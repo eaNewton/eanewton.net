@@ -5,10 +5,30 @@ h1, h2, h3, h4, h5, h6 {
 h1 {
   color: map(colors, primary, base);
   font-size: 64px;
+
+  @media (max-width: 767px) {
+    font-size: 44px;
+  }
 }
 
 h2, h3 {
   color: map(colors, secondary, base);
+}
+
+h2 {
+  font-size: 48px;
+
+  @media (max-width: 767px) {
+    font-size: 36px;
+  }
+}
+
+h3 {
+  font-size: 36px;
+
+  @media (max-width: 767px) {
+    font-size: 30px;
+  }
 }
 
 h4, h5, h6 {

@@ -39,11 +39,20 @@ body {
             max-width: 650px;
             margin: 0;
           }
+
+          h2 {
+            margin: -18px 0 0 0;
+            color: map(colors, primary, base);
+          }
         }
       }
 
       #hero-two {
         background-color: map(colors, tertiary, base);
+
+        .section-inner {
+          text-align: right;
+        }
       }
     }
   }

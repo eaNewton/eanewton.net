@@ -30,14 +30,16 @@
       <div class="section-container">
         <section id="hero-one" class="site-section">
           <div class="section-inner">
-            <h1>Austin, TX-based web development</h1>
+            <h1>e. a. newton</h1>
+            <h2>web developer</h2>
             <a href="#hero-two" class="button">Let's go</a>
           </div>
         </section>
         <section id="hero-two" class="site-section">
           <div class="section-inner">
-            <h2>WUPHF.com!</h2>
-            <h3>You're falling behind...</h3>
+            <h2>austin, tx-based web development</h2>
+            <h3>Here's a bunch of text for some reason</h3>
+            <p>Sometimes there's just a bunch of text on a page, and there's not really an explanation. One might consider this to be one of those times.</p>
           </div>
         </section>
       </div>
