@@ -38,11 +38,11 @@
       }
 
       &#nav-two {
-        background-color: map(colors, secondary, base);
+        background-color: map(colors, tertiary, base);
       }
 
       &#nav-three {
-        background-color: map(colors, tertiary, base);
+        background-color: map(colors, secondary, base);
       }
 
       &#nav-four {

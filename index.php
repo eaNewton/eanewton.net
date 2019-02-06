@@ -42,6 +42,8 @@
             <p>Sometimes there's just a bunch of text on a page, and there's not really an explanation. One might consider this to be one of those times.</p>
           </div>
         </section>
+        <section id="hero-three" class="site-section"></section>
+        <section id="hero-four" class="site-section"></section>
       </div>
       <footer class="footer">
         <div class="site-section">
